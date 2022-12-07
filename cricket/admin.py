@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import CricketPosts
 
-# Register your models here.
+
+@admin.register(CricketPosts)
+class CricketPosts(admin.ModelAdmin):
+    list_display = ('title',)
