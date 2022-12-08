@@ -4,4 +4,4 @@ from .models import CricketPosts
 
 @admin.register(CricketPosts)
 class CricketPosts(admin.ModelAdmin):
-    list_display = ('title',)
+    list_display = ('title','date')
