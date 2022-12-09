@@ -29,10 +29,17 @@ INSTALLED_APPS = [
     
     
     'rest_framework',
+    'rest_framework.authtoken',
     'users',
     'cricket',
            
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': {
+        'rest_framework.permissions.IsAuthenticated',
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

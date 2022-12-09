@@ -8,7 +8,7 @@ from datetime import date
 class AccountsManager(BaseUserManager):
     use_in_migrations = True
     
-    def create_user(self, email,username,password=None):
+    def create_user(self,name, email,username,password=None):
         if not email:
             raise ValueError("Users must have an valid email address.")
         if not username :
@@ -17,6 +17,7 @@ class AccountsManager(BaseUserManager):
         user = self.model(
             email = self.normalize_email(email),
             username = username,
+            name=name,
         )
         user.set_password(password)
         user.save()
@@ -37,6 +38,8 @@ class AccountsManager(BaseUserManager):
 
 
 class Accounts(AbstractBaseUser):
+    
+   
     
     username        = models.CharField(max_length=30 ,unique= True)
     name            = models.CharField(max_length=40)
@@ -65,7 +68,7 @@ class Accounts(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
     
-    def calculate_age(self):
+    def age(self):
         today  = date.today()
          
         try:
@@ -84,4 +87,20 @@ class Accounts(AbstractBaseUser):
         
         
         
+class Profile(models.Model):
     
+    FOOTBALL    = "F"
+    CRICKET     = "C"
+    GENERAL     = "G"   
+    GAME_CHOICE      = [
+        (CRICKET, "Cricket"),
+        (FOOTBALL, "Football"),
+        (GENERAL, "General")
+    ]
+    
+    
+    games               = models.CharField(max_length=2,choices=GAME_CHOICE, default=GENERAL)
+    user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
+    
+  
+        
