@@ -59,8 +59,7 @@ class Accounts(AbstractBaseUser):
     USERNAME_FIELD      = 'email'
     REQUIRED_FIELDS     = ['username']
     
-    def __str__(self):
-        return self.username
+   
     
     def has_perm(self,perm,obj = None):
         return self.is_admin
@@ -99,7 +98,7 @@ class Profile(models.Model):
     ]
     
     
-    games               = models.CharField(max_length=2,choices=GAME_CHOICE, default=GENERAL)
+    games               = models.CharField(max_length=20,choices=GAME_CHOICE, default=GENERAL)
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
     
   

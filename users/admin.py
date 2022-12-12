@@ -6,7 +6,7 @@ from django.contrib.auth.admin import UserAdmin
 
 class AccountsAdmin(UserAdmin):
     
-    list_display        = ('username','email','is_admin','name')
+    list_display        = ('username','email','is_admin','name','id')
     search_fields       = ('email', 'username')
     readonly_fields     = ('id',)
     
@@ -18,6 +18,6 @@ admin.site.register(Accounts,AccountsAdmin)
 
 @admin.register(Profile)
 class ProfileHolder(admin.ModelAdmin):
-    list_display        = ('games','user')
+    list_display        = ('games','user','id')
 
 
