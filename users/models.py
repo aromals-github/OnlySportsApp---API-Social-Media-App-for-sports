@@ -39,27 +39,20 @@ class AccountsManager(BaseUserManager):
 
 class Accounts(AbstractBaseUser):
     
-   
-    
     username        = models.CharField(max_length=30 ,unique= True)
     name            = models.CharField(max_length=40)
     email           = models.EmailField(verbose_name='email', max_length=60 ,unique = True)
-    DOB             = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=True)
     date_joined     = models.DateTimeField(auto_now_add=True)
-    profile_image   = models.ImageField(upload_to='profile_pictures',null=True,blank=True)
     hide_email      = models.BooleanField(default=True)
     is_superuser    = models.BooleanField(default=False)
     is_staff        = models.BooleanField(default=False)
     is_active       = models.BooleanField(default=True)
     is_admin        = models.BooleanField(default=False)
     
-    
     objects = AccountsManager()
     
     USERNAME_FIELD      = 'email'
     REQUIRED_FIELDS     = ['username']
-    
-   
     
     def has_perm(self,perm,obj = None):
         return self.is_admin
@@ -67,25 +60,9 @@ class Accounts(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
     
-    def age(self):
-        today  = date.today()
-         
-        try:
-            birthday = self.DOB.replace(year=today.year)
-        except ValueError:
-            birthday = self.DOB.replace(year=today.year,day=self.DOB.day-1)
-    
-        if birthday > today:
-            return today.year - self.DOB.year - 1
-        else :
-            return today.year -self.DOB.year
-        
     class Meta:
         
         verbose_name_plural = "Accounts"
-        
-        
-        
 class Profile(models.Model):
     
     FOOTBALL    = "F"
@@ -100,6 +77,21 @@ class Profile(models.Model):
     
     games               = models.CharField(max_length=20,choices=GAME_CHOICE, default=GENERAL)
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
+    DOB                 = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=True)
+    profile_image       = models.ImageField(upload_to='profile_pictures',null=True,blank=True)
     
+    def age(self):
+        
+        today  = date.today() 
+        try:
+            birthday = self.DOB.replace(year=today.year)
+        except ValueError:
+            birthday = self.DOB.replace(year=today.year,day=self.DOB.day-1)
+    
+        if birthday > today:
+            return today.year - self.DOB.year - 1
+        else :
+            return today.year -self.DOB.year
+        
   
         
