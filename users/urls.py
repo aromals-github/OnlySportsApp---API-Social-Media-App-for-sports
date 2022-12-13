@@ -7,10 +7,10 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register('accounts',AccountsViewSet)
-# router.register('user/profile',UserProfileViewSet)
+
 
 
 urlpatterns = [
-    # path('',include(router.urls)),
+    path('create/',include(router.urls)),
     path('user/profile/', views.UserProfileViewSet.as_view()),
 ]
