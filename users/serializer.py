@@ -18,4 +18,4 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta :
         model           = Profile
-        fields          = ('user','games')      
+        fields          = ('user','games','profile_image','DOB','age')      
