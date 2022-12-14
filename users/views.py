@@ -42,15 +42,18 @@ class UserProfileViewSet(APIView):
     
     def post(self,request,*args,**kwargs):  
         
-        user    = request.user
-        user_id = user.id
+        user_logged   = request.user
+        user_id = user_logged.id
         
         try :
             if Profile.objects.filter(user = user_id):
                 response = {'message': "You already have a profile set."}
             return Response(response,status=status.HTTP_409_CONFLICT)  
-        except:     
-            serializer = ProfileSerializer(data=request.data)
+        except: 
+             
+            id_user     = Accounts.objects.get(id = user_id) 
+            user        = Profile.objects.create(user = id_user)
+            serializer  = ProfileSerializer(user,data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)

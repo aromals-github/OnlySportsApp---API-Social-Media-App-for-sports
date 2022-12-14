@@ -8,7 +8,8 @@ from datetime import date
 class AccountsManager(BaseUserManager):
     use_in_migrations = True
     
-    def create_user(self,name, email,username,password=None):
+    def create_user(self,email,username,password=None):
+        
         if not email:
             raise ValueError("Users must have an valid email address.")
         if not username :
@@ -17,7 +18,6 @@ class AccountsManager(BaseUserManager):
         user = self.model(
             email = self.normalize_email(email),
             username = username,
-            name=name,
         )
         user.set_password(password)
         user.save()
@@ -26,8 +26,9 @@ class AccountsManager(BaseUserManager):
     def create_superuser(self,email,username,password):
         user =  self.create_user(
                                     email = self.normalize_email(email),
-                                    username = username, password =password,
-        )
+                                    username = username,
+                                    password = password,
+                            )
         
         user.is_admin       = True
         user.is_staff       = True
@@ -40,7 +41,6 @@ class AccountsManager(BaseUserManager):
 class Accounts(AbstractBaseUser):
     
     username        = models.CharField(max_length=30 ,unique= True)
-    name            = models.CharField(max_length=40)
     email           = models.EmailField(verbose_name='email', max_length=60 ,unique = True)
     date_joined     = models.DateTimeField(auto_now_add=True)
     hide_email      = models.BooleanField(default=True)
@@ -78,10 +78,11 @@ class Profile(models.Model):
     games               = models.CharField(max_length=20,
                                            choices=GAME_CHOICE,
                                            default=GENERAL)
-    
+    name                = models.CharField(max_length=40,blank=False,null=True)
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
     DOB                 = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=True)
     profile_image       = models.ImageField(upload_to='profile_pictures',null=True,blank=True)
+    bio                 = models.CharField(max_length =  500 ,blank = True)
     
     def age(self):
         

@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model           = Accounts
-        fields          = ('id','username','password','name','email')
+        fields          = ('id','username','password','email')
         extra_kwargs    = {'passwords': {'write_only':True, 'required':True}}
         
     def create(self,validated_data):
@@ -18,4 +18,4 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta :
         model           = Profile
-        fields          = ('user','games','profile_image','DOB','age')      
+        fields          = ('games','profile_image','DOB','age','bio','name')      
