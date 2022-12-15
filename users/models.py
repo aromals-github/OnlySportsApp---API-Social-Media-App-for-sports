@@ -22,6 +22,7 @@ class AccountsManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user 
+    
 
     def create_superuser(self,email,username,password):
         user =  self.create_user(
@@ -61,8 +62,9 @@ class Accounts(AbstractBaseUser):
         return True
     
     class Meta:
-        
         verbose_name_plural = "Accounts"
+        
+        
 class Profile(models.Model):
     
     FOOTBALL    = "F"
