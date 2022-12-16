@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from users.models import Accounts
 
 class CricketPosts(models.Model):
@@ -15,9 +14,28 @@ class CricketPosts(models.Model):
         verbose_name        = 'cricket post'
         
 class PostFuntions(models.Model):
+    
+    DEFAULT = 0  
+    REASON1 = 1
+    REASON2 = 2
+    REASON3 = 3
+    REASON4 = 4
+
+    REPORT_REASON = [
+        (DEFAULT,"NONE"),
+        (REASON1, "This post is not related to cricket"),
+        (REASON2, "Content of the this particular post is abusive"),
+        (REASON3, "Sexual Content ") ,
+        (REASON4, "Others")
+    ]
+    
     post_id             = models.OneToOneField(CricketPosts,on_delete = models.CASCADE)
     likes               = models.ManyToManyField(Accounts,related_name ='likes',blank=True)
-    
+    dislike             = models.ManyToManyField(Accounts,related_name='dislike',blank=True)
+    report              = models.IntegerField(
+                                           choices = REPORT_REASON,
+                                           default = DEFAULT
+                                           )
     class Meta:
         verbose_name_plural = "post funtions"
       

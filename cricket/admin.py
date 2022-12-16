@@ -9,4 +9,4 @@ class CricketPosts(admin.ModelAdmin):
 
 @admin.register(PostFuntions)
 class PostFuntions(admin.ModelAdmin):
-    list_display = ('id','post_id')
+    list_display = ('id','post_id','report')

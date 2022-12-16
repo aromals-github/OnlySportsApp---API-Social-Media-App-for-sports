@@ -6,6 +6,6 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api_cricket/',include('cricket.urls')),
+    path('api/cricket/',include('cricket.urls')),
     path('authentication/',include('users.urls')),
 ]

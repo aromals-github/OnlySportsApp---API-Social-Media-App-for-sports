@@ -80,6 +80,7 @@ class Profile(models.Model):
     games               = models.CharField(max_length=20,
                                            choices=GAME_CHOICE,
                                            default=GENERAL)
+    
     name                = models.CharField(max_length=40,blank=False,null=True)
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
     DOB                 = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=True)

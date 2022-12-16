@@ -1,4 +1,3 @@
-
 from rest_framework import viewsets,status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .models import Accounts,Profile
@@ -30,8 +29,7 @@ class UserProfileViewSet(APIView):
         try :
             if Profile.objects.filter(user = user_id) :
                 database    = Profile.objects.get(user = user_id)
-                serializer  = ProfileSerializer(database, many=False)
-                print(serializer.data)   
+                serializer  = ProfileSerializer(database, many=False)   
                 return Response ({'data':serializer.data},status=status.HTTP_302_FOUND)
             else :
                 response    = {'message':'There is no profile for this user '}
