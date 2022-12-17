@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'cricket',
     'football',
     'general',
+    
+    'multiselectfield'
            
 ]
 
