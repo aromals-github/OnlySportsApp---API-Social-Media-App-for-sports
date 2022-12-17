@@ -1,13 +1,12 @@
 from rest_framework import viewsets,status
 from rest_framework.permissions import AllowAny,IsAuthenticated
+
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Accounts,Profile
 from .serializer import AccountSerializer,ProfileSerializer
-from rest_framework.authentication import TokenAuthentication
-
-from rest_framework.response import Response
-
-
-from rest_framework.views import APIView
 
 class AccountsViewSet(viewsets.ModelViewSet):
     
@@ -24,14 +23,18 @@ class UserProfileViewSet(APIView):
     
     
     def get(self,request,*args,**kwargs):
+        
         user    = request.user
         user_id = user.id
         try :
             if Profile.objects.filter(user = user_id) :
+                
                 database    = Profile.objects.get(user = user_id)
                 serializer  = ProfileSerializer(database, many=False)   
                 return Response ({'data':serializer.data},status=status.HTTP_302_FOUND)
+            
             else :
+                
                 response    = {'message':'There is no profile for this user '}
                 return Response(response,status = status.HTTP_204_NO_CONTENT)
         except:
@@ -52,10 +55,14 @@ class UserProfileViewSet(APIView):
             id_user     = Accounts.objects.get(id = user_id) 
             user        = Profile.objects.create(user = id_user)
             serializer  = ProfileSerializer(user,data=request.data)
+            
             if serializer.is_valid():
+                
                 serializer.save()
                 return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)
+            
             else:
+                
                 return Response({'errors':serializer.errors},status=status.HTTP_403_FORBIDDEN)
        
             
@@ -82,3 +89,4 @@ class UserProfileViewSet(APIView):
                 return Response (response, status = status.HTTP_204_NO_CONTENT) 
         except:     
            return Response(status=status.HTTP_102_PROCESSING)
+       
