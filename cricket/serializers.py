@@ -6,7 +6,7 @@ class PostSerializer(serializers.ModelSerializer):
     
     class Meta:
         model   = CricketPosts
-        fields  = ('id','images','title','description','date','user')
+        fields  = ('id','images','title','description','date')
         
         
 class PostFuntionSeriaizer(serializers.ModelSerializer):
