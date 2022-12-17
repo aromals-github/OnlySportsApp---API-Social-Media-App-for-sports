@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser,BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from datetime import date
-
+from multiselectfield import MultiSelectField
 
 
 class AccountsManager(BaseUserManager):
@@ -77,9 +77,10 @@ class Profile(models.Model):
     ]
     
     
-    games               = models.CharField(max_length=20,
-                                           choices=GAME_CHOICE,
-                                           default=GENERAL)
+    games               = MultiSelectField(choices=GAME_CHOICE,
+                                                  max_choices = 2,
+                                                  max_length= 5,
+                                                  default=GENERAL)
     
     name                = models.CharField(max_length=40,blank=False,null=True)
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
