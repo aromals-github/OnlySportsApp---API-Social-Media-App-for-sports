@@ -18,6 +18,6 @@ admin.site.register(Accounts,AccountsAdmin)
 
 @admin.register(Profile)
 class ProfileHolder(admin.ModelAdmin):
-    list_display        = ('games','user','id')
+    list_display        = ('user','id')
 
 
