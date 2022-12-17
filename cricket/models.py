@@ -3,12 +3,24 @@ from users.models import Accounts
 
 class CricketPosts(models.Model):
     
+    FOOTBALL    = "F"
+    CRICKET     = "C"  
+    GAME_CHOICE      = [
+        (CRICKET, "Cricket"),
+        (FOOTBALL, "Football"),
+    ]
+    
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
     images              = models.ImageField(upload_to = "cricket_posts",blank = True,null = True)
     title               = models.CharField(max_length = 80,blank = True,null = True)
     description         = models.TextField(max_length = 500,blank = False)
-    date                = models.DateTimeField(auto_now_add = True, null = True,blank = True)
+    date                = models.DateTimeField(auto_now_add = True, null = True,blank = True) 
+    context             = models.CharField(max_length=2,choices = GAME_CHOICE,blank=True
+                                           ,null=True)
     
+    ''' Here the context has to changed to blank = False and null = False
+        Post should always contain a handle which is the 
+        context '''
     class Meta:
         verbose_name_plural = "cricket posts"
         verbose_name        = 'cricket post'
