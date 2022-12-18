@@ -72,7 +72,6 @@ class UserProfileViewSet(APIView):
             user = request.user
             user_id = user.id
             
-            
             if Profile.objects.filter(user=user_id):
                 user        = Profile.objects.get(user=user_id)
                 serializer  = ProfileSerializer(user,data=request.data)

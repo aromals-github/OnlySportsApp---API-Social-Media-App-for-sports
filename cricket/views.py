@@ -85,4 +85,4 @@ class PostUpdateDeleteView(APIView):
             get_post.delete()
             return Response({'message':'deleted'})
         else:
-            return Response({'message':'not deleted'})
+            return Response({'message':'You are the owner of the post.'})
