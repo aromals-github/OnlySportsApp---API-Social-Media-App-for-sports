@@ -6,7 +6,13 @@ class PostSerializer(serializers.ModelSerializer):
     
     class Meta:
         model   = CricketPosts
-        fields  = ('id','images','title','description','date')
+        fields  = ('id','images','title','description','date','context')
+        
+class UpadateDeleteSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model   = CricketPosts
+        fields  = ('images','title','description','context')
         
         
 class PostFuntionSeriaizer(serializers.ModelSerializer):
