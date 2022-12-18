@@ -57,12 +57,10 @@ class UserProfileViewSet(APIView):
             serializer  = ProfileSerializer(user,data=request.data)
             
             if serializer.is_valid():
-                
                 serializer.save()
                 return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)
             
             else:
-                
                 return Response({'errors':serializer.errors},status=status.HTTP_403_FORBIDDEN)
        
             

@@ -27,22 +27,19 @@ class CricketPostsUploadView(APIView):
                 profile= Profile.objects.get(user = user_id)
                 
                 if ('C' in profile.games ) and ('C' in request.data['context']):
-                    
+            
                     user_id_logged = Accounts.objects.get(id = user_id)
                     user = CricketPosts.objects.create(user = user_id_logged)
                     serializer = PostSerializer(user,data = request.data)
                     
                     if serializer.is_valid():
-                        
                         serializer.save()
                         return Response({'data': serializer.data},status = 
                                         status.HTTP_201_CREATED)
                     else:
-                        
                         return Response({'errors':serializer.errors},status = 
                                         status.HTTP_400_BAD_REQUEST)
                 else:
-                    
                     response =({'message': 
                         "You can't create a post related to cricket,with your current profile "})
                     return Response(response,status = status.HTTP_403_FORBIDDEN) 
@@ -76,7 +73,6 @@ class PostUpdateDeleteView(APIView):
                 return Response({'errors':serializer.errors},status = 
                                         status.HTTP_400_BAD_REQUEST)
         else:
-            
             return Response({'msg':'Your are not the owner of this post'})
         
     def delete(self,request,pk):
