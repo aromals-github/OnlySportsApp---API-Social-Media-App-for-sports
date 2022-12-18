@@ -1,6 +1,6 @@
 
 from .models import CricketPosts
-from .serializers import PostSerializer
+from .serializers import PostSerializer,UpadateDeleteSerializer
 
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
@@ -51,3 +51,42 @@ class CricketPostsUploadView(APIView):
             
             response = ({'message': 'You are not logged in or you dont have an profile'})
             return Response(status = status.HTTP_206_PARTIAL_CONTENT)
+    
+    
+class PostUpdateDeleteView(APIView):
+    
+    authentication_classes  = (TokenAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = CricketPosts.objects.all()
+    serializer_class        = UpadateDeleteSerializer
+    
+    
+    def put(self,request,pk):
+        
+        logged_in_user  = request.user
+        user            = logged_in_user.id
+        
+        if CricketPosts.objects.filter(id=pk).filter(user=user):
+            get_post    = CricketPosts.objects.get(id=pk)
+            serializer  = UpadateDeleteSerializer(get_post,data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)
+            else :
+                return Response({'errors':serializer.errors},status = 
+                                        status.HTTP_400_BAD_REQUEST)
+        else:
+            
+            return Response({'msg':'Your are not the owner of this post'})
+        
+    def delete(self,request,pk):
+        
+        logged_in_user  = request.user
+        user            = logged_in_user.id
+    
+        if CricketPosts.objects.filter(id=pk).filter(user=user):
+            get_post    = CricketPosts.objects.get(id=pk)
+            get_post.delete()
+            return Response({'message':'deleted'})
+        else:
+            return Response({'message':'not deleted'})
