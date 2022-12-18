@@ -4,7 +4,7 @@ from .models import CricketPosts,PostFuntions
 
 @admin.register(CricketPosts)
 class CricketPosts(admin.ModelAdmin):
-    list_display = ('title','date')
+    list_display = ('title','date','id','user')
 
 
 @admin.register(PostFuntions)
