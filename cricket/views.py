@@ -26,7 +26,8 @@ class CricketPostsUploadView(APIView):
             if Profile.objects.get(user = user_id):
                 profile= Profile.objects.get(user = user_id)
                 
-                if ('C' in profile.games ) and ('C' in request.data['context']):
+                if (('C' in profile.games ) and 
+                    ('C' in request.data['context'])) or ('G' in profile.games):
             
                     user_id_logged = Accounts.objects.get(id = user_id)
                     user = CricketPosts.objects.create(user = user_id_logged)
@@ -51,7 +52,7 @@ class CricketPostsUploadView(APIView):
     
     
 class PostUpdateDeleteView(APIView):
-    
+     
     authentication_classes  = (TokenAuthentication,)
     permission_classes      = (IsAuthenticated,)
     queryset                = CricketPosts.objects.all()
@@ -73,7 +74,7 @@ class PostUpdateDeleteView(APIView):
                 return Response({'errors':serializer.errors},status = 
                                         status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'msg':'Your are not the owner of this post'})
+            return Response({'message':'Your are not the owner of this post'})
         
     def delete(self,request,pk):
         
@@ -85,4 +86,4 @@ class PostUpdateDeleteView(APIView):
             get_post.delete()
             return Response({'message':'deleted'})
         else:
-            return Response({'message':'You are the owner of the post.'})
+            return Response({'message':'You are the owner of the post.'}) 
