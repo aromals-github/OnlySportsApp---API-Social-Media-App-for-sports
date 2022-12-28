@@ -3,11 +3,12 @@ from users.models import Accounts
 
 class CricketPosts(models.Model):
     
-    FOOTBALL    = "F"
-    CRICKET     = "C"  
+    
+    CRICKET     = "C"
+    GENERAL     = "G"  
     GAME_CHOICE      = [
         (CRICKET, "Cricket"),
-        (FOOTBALL, "Football"),
+        (GENERAL, "General"),
     ]
     
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
