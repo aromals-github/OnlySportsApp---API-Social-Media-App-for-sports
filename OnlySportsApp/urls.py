@@ -8,4 +8,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/cricket/',include('cricket.urls')),
     path('authentication/',include('users.urls')),
+    path('api/football/' ,include('football.urls')),
 ]
