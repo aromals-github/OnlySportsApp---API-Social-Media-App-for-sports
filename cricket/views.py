@@ -1,7 +1,6 @@
 
-from .models import CricketPosts
-from .serializers import PostSerializer,UpadateDeleteSerializer
-
+from .models import CricketPosts,PostFuntions
+from .serializers import PostSerializer,UpadateDeleteSerializer,PostFuntionSerializer
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
@@ -9,7 +8,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from users.models import Profile,Accounts
-
+from .backend import createPostFuntions
 class CricketPostsUploadView(APIView):
     
     queryset                = CricketPosts.objects.all()
@@ -34,9 +33,12 @@ class CricketPostsUploadView(APIView):
                     serializer = PostSerializer(user,data = request.data)
                     
                     if serializer.is_valid():
+                        
                         serializer.save()
+                        call = createPostFuntions()
                         return Response({'data': serializer.data},status = 
-                                        status.HTTP_201_CREATED)
+                                        status.HTTP_201_CREATED,)
+                        
                     else:
                         return Response({'errors':serializer.errors},status = 
                                         status.HTTP_400_BAD_REQUEST)
@@ -48,7 +50,7 @@ class CricketPostsUploadView(APIView):
         except:
             
             response = ({'message': 'You are not logged in or you dont have an profile'})
-            return Response(status = status.HTTP_206_PARTIAL_CONTENT)
+            return Response(status = status.HTTP_307_TEMPORARY_REDIRECT)
     
     
 class PostUpdateDeleteView(APIView):
@@ -87,3 +89,40 @@ class PostUpdateDeleteView(APIView):
             return Response({'message':'deleted'})
         else:
             return Response({'message':'You are the owner of the post.'}) 
+        
+        
+        
+        
+class CricketPostUserFuntions(APIView):
+    
+    queryset                = PostFuntions.objects.all()
+    serializer_class        = PostFuntionSerializer
+    authentication_classes  = (TokenAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    
+    def post(self,request,pk,*args,**kwargs):
+        
+        user = request.user
+        user_id = user.id
+        
+        if CricketPosts.objects.get(id=pk):
+            
+            post_called     = CricketPosts.objects.get(id=pk)
+            
+            try:
+                if  PostFuntions.objects.get(post_id=post_called):
+                    
+                    postInCall = PostFuntions.objects.get(post_id=post_called)
+                    serializer =  PostFuntionSerializer(postInCall,data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response ({'data':serializer.data})
+            
+            except:   
+    
+                return Response (status=status.HTTP_403_FORBIDDEN)
+           
+        else:
+            
+            return Response({'message':"this isnt working"})
