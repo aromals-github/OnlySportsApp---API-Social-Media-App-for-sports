@@ -15,10 +15,10 @@ class UpadateDeleteSerializer(serializers.ModelSerializer):
         fields  = ('images','title','description','context')
         
         
-class PostFuntionSeriaizer(serializers.ModelSerializer):
+class PostFuntionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model   = PostFuntions
-        fields  = ('id','post_id','likes','dislike','report')   
+        fields  = ('likes','dislike','report')   
         
         
