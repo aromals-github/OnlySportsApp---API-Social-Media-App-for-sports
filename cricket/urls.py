@@ -7,5 +7,6 @@ urlpatterns = [
     
     path('upload/post',views.CricketPostsUploadView.as_view()),
     path('edit/post/<int:pk>',views.PostUpdateDeleteView.as_view()),
+    path('user-rating/<int:pk>',views.CricketPostUserFuntions.as_view())
     
 ]
