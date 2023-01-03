@@ -1,6 +1,6 @@
 
 from .models import CricketPosts,PostFuntions
-from .serializers import PostSerializer,UpadateDeleteSerializer,PostFuntionSerializer
+from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
@@ -93,7 +93,7 @@ class PostUpdateDeleteView(APIView):
         
         
         
-class CricketPostUserFuntions(APIView):
+class CricketPostLikeFuntion(APIView):
     
     queryset                = PostFuntions.objects.all()
     serializer_class        = PostFuntionSerializer
@@ -103,26 +103,72 @@ class CricketPostUserFuntions(APIView):
     
     def post(self,request,pk,*args,**kwargs):
         
-        user = request.user
-        user_id = user.id
+        user    = request.user
+        userID  =   user.id
         
         if CricketPosts.objects.get(id=pk):
             
-            post_called     = CricketPosts.objects.get(id=pk)
+            postCALLED  = PostFuntions.objects.get(post_id=pk)
             
-            try:
-                if  PostFuntions.objects.get(post_id=post_called):
-                    
-                    postInCall = PostFuntions.objects.get(post_id=post_called)
-                    serializer =  PostFuntionSerializer(postInCall,data=request.data)
-                    if serializer.is_valid():
-                        serializer.save()
-                        return Response ({'data':serializer.data})
+            if postCALLED.likes.filter(id=userID).exists():
+                postCALLED.likes.remove(userID)
+                return Response({'message':"removed"})
+            else:
+                postCALLED.likes.add(userID)
+                return Response({'message':'added'})
             
-            except:   
+            
+            
+
+class CricketPostDislikeFuntion(APIView):
     
-                return Response (status=status.HTTP_403_FORBIDDEN)
-           
-        else:
+    queryset                = PostFuntions.objects.all()
+    serializer_class        = PostFuntionSerializer
+    authentication_classes  = (TokenAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    
+    def post(self,request,pk,*args,**kwargs):
+        
+        user    = request.user
+        userID  =   user.id
+        
+        if CricketPosts.objects.get(id=pk):
             
-            return Response({'message':"this isnt working"})
+            postCALLED  = PostFuntions.objects.get(post_id=pk)
+            
+            if postCALLED.dislike.filter(id=userID).exists():
+                postCALLED.dislike.remove(userID)
+                return Response({'message':"removed"})
+            else:
+                postCALLED.dislike.add(userID)
+                return Response({'message':'added'})
+            
+
+
+class CricketPostViewAllPosts(APIView):
+      
+    serializer_class        = PostViewSerializer
+    authentication_classes  = (TokenAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    def get(self,request,*args,**kwargs):
+        
+        AllPosts        = CricketPosts.objects.all()
+        serializer      = PostViewSerializer(AllPosts,many=True)
+        context         = {'data':serializer.data}
+        return Response(context,status=status.HTTP_302_FOUND)
+    
+    
+class PostInfoViewSet(APIView):
+    
+    serializer_class        = PostFuntionSerializer
+    authentication_classes  = (TokenAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    def get(self,request,pk,*args,**kwargs):
+        
+        getPost     = PostFuntions.objects.get(post_id=pk)
+        serializer  = PostFuntionSerializer(getPost)
+        return Response({'post review':serializer.data})
+    
