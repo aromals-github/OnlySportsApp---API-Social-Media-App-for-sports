@@ -35,7 +35,7 @@ class UserProfileViewSet(APIView):
             
             else :
                 
-                response    = {'message':'There is no profile for this user '}
+                response    = {'message':'There is no profile set for this user '}
                 return Response(response,status = status.HTTP_204_NO_CONTENT)
         except:
             return Response(status=status.HTTP_205_RESET_CONTENT)
