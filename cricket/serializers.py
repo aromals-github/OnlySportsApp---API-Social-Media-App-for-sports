@@ -8,6 +8,12 @@ class PostSerializer(serializers.ModelSerializer):
         model   = CricketPosts
         fields  = ('id','images','title','description','date','context')
         
+class PostViewSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model   = CricketPosts
+        fields  = ('id','images','title','description','date','context','nameUser')
+        
 class UpadateDeleteSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -19,6 +25,9 @@ class PostFuntionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model   = PostFuntions
-        fields  = ('likes','dislike','report')   
+        fields  = ('likes','dislike','report','number_of_likes','number_of_dislikes')  
+        
+        
+
         
         
