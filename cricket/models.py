@@ -26,6 +26,10 @@ class CricketPosts(models.Model):
         verbose_name_plural = "cricket posts"
         verbose_name        = 'cricket post'
         
+    def nameUser(self):
+        user = self.user
+        userPost = Accounts.objects.get(email=user)
+        return (userPost.username)
 class PostFuntions(models.Model):
     
     DEFAULT = 0  
@@ -52,3 +56,10 @@ class PostFuntions(models.Model):
     class Meta:
         verbose_name_plural = "post funtions"
       
+      
+    def number_of_likes(self):
+        return self.likes.count()
+    
+    def number_of_dislikes(self):
+        return self.dislike.count()
+    
