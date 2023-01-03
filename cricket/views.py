@@ -9,6 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 
 from users.models import Profile,Accounts
 from .backend import createPostFuntions
+
+
+
+
+
 class CricketPostsUploadView(APIView):
     
     queryset                = CricketPosts.objects.all()
@@ -35,7 +40,7 @@ class CricketPostsUploadView(APIView):
                     if serializer.is_valid():
                         
                         serializer.save()
-                        call = createPostFuntions()
+                        createPostFuntions()
                         return Response({'data': serializer.data},status = 
                                         status.HTTP_201_CREATED,)
                         
