@@ -6,7 +6,6 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-
 from users.models import Profile,Accounts
 from .backend import createPostFuntions
 
@@ -22,7 +21,7 @@ class CricketPostsUploadView(APIView):
     permission_classes      = (IsAuthenticated,)
 
     def post(self,request,*args,**kwargs):
-        
+                    
         try:
             user_logged     = request.user
             user_id         = user_logged.id
@@ -42,7 +41,7 @@ class CricketPostsUploadView(APIView):
                         serializer.save()
                         createPostFuntions()
                         return Response({'data': serializer.data},status = 
-                                        status.HTTP_201_CREATED,)
+                                        status.HTTP_201_CREATED)
                         
                     else:
                         return Response({'errors':serializer.errors},status = 
