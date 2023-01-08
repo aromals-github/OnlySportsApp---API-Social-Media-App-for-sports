@@ -2,18 +2,68 @@ from rest_framework import viewsets,status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 
 from rest_framework.authentication import TokenAuthentication
+
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Accounts,Profile
-from .serializer import AccountSerializer,ProfileSerializer
+from .serializer import SignUpSerializer,ProfileSerializer
+from rest_framework.request import Request
+from django.contrib.auth import authenticate
 
-class AccountsViewSet(viewsets.ModelViewSet):
+from rest_framework.authtoken.models import Token
+
+
+
+class SignUpUserViewSet(APIView):
+
+    serializer_class        = SignUpSerializer
+    permission_classes      = []
+  
+  
+    def post(self,request:Request):
+        
+        data        = request.data
+        serializer  = self.serializer_class(data=data) 
+        
+        if serializer.is_valid():
+            serializer.save()
+            response =  {
+                "message": "User is Created Successfully", "data":serializer.data
+            }
+            return Response(data = response, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+   
+   
+   
     
-    queryset                = Accounts.objects.all()
-    serializer_class        = AccountSerializer
-    permission_classes      = (AllowAny,)
+class LoginViewSet(APIView):
     
+    permission_classes = []
+    
+    def post(self,request: Request):
+         
+        email      = request.data.get("email")
+        password   = request.data.get("password")
+         
+        user       = authenticate(email=email,password=password)
+        
+        if user is not None:
+            
+            from .tokens import create_jwt_token
+            from .serializer import TokenSerializer
+            
+            get_token = Token.objects.get(user=user)
+            token_serializer = TokenSerializer(get_token)
+            
+            token       = create_jwt_token(user=user)
+            response    = {"message":"logged in","tokens":token,
+                           "UserToken":token_serializer.data}
+            return Response(data=response)
+        return Response({"message":"credentials are not given ."})
+        
+             
 class UserProfileViewSet(APIView):
     
     queryset                = Profile.objects.all()

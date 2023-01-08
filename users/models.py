@@ -6,9 +6,10 @@ from multiselectfield import MultiSelectField
 
 
 class AccountsManager(BaseUserManager):
+    
     use_in_migrations = True
     
-    def create_user(self,email,username,password=None):
+    def create_user(self,email,username,password):
         
         if not email:
             raise ValueError("Users must have an valid email address.")
@@ -41,10 +42,11 @@ class AccountsManager(BaseUserManager):
 
 class Accounts(AbstractBaseUser):
     
-    username        = models.CharField(max_length=30 ,unique= True)
+    username        = models.CharField(max_length=30 ,unique = True)
     email           = models.EmailField(verbose_name='email', max_length=60 ,unique = True)
     date_joined     = models.DateTimeField(auto_now_add=True)
     hide_email      = models.BooleanField(default=True)
+    
     is_superuser    = models.BooleanField(default=False)
     is_staff        = models.BooleanField(default=False)
     is_active       = models.BooleanField(default=True)
@@ -61,6 +63,8 @@ class Accounts(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
     
+    def __str__(self):
+        return self.username
     class Meta:
         verbose_name_plural = "Accounts"
         
