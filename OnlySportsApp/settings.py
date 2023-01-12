@@ -34,12 +34,14 @@ INSTALLED_APPS = [
     'users',
     'cricket',
     'football',
-    'UserProfile',
+    
     
     'multiselectfield',
     'rest_framework_simplejwt.token_blacklist',
            
 ]
+
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
@@ -125,12 +127,20 @@ WSGI_APPLICATION = 'OnlySportsApp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DB_NAME = "sports"
+DB_USER = "aromal"
+DB_PASSWORD = "everlasting123"
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
