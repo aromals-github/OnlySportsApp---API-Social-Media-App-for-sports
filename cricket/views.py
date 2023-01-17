@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from users.models import Profile,Accounts
 from .backend import createPostFuntions
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 
@@ -17,7 +17,7 @@ class CricketPostsUploadView(APIView):
     
     queryset                = CricketPosts.objects.all()
     serializer_class        = PostSerializer
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
 
     def post(self,request,*args,**kwargs):
@@ -59,7 +59,7 @@ class CricketPostsUploadView(APIView):
     
 class PostUpdateDeleteView(APIView):
      
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     queryset                = CricketPosts.objects.all()
     serializer_class        = UpadateDeleteSerializer
@@ -101,7 +101,7 @@ class CricketPostLikeFuntion(APIView):
     
     queryset                = PostFuntions.objects.all()
     serializer_class        = PostFuntionSerializer
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
     
@@ -128,7 +128,7 @@ class CricketPostDislikeFuntion(APIView):
     
     queryset                = PostFuntions.objects.all()
     serializer_class        = PostFuntionSerializer
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
     
@@ -153,7 +153,7 @@ class CricketPostDislikeFuntion(APIView):
 class CricketPostViewAllPosts(APIView):
       
     serializer_class        = PostViewSerializer
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
     def get(self,request,*args,**kwargs):
@@ -167,7 +167,7 @@ class CricketPostViewAllPosts(APIView):
 class PostInfoViewSet(APIView):
     
     serializer_class        = PostFuntionSerializer
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
     def get(self,request,pk,*args,**kwargs):

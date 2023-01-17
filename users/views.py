@@ -1,20 +1,16 @@
-from rest_framework import viewsets,status
-from rest_framework.permissions import AllowAny,IsAuthenticated
-
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .models import Accounts,Profile
 from .serializer import SignUpSerializer,ProfileSerializer
 from rest_framework.request import Request
 from django.contrib.auth import authenticate
-
 from rest_framework.authtoken.models import Token
-
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class SignUpUserViewSet(APIView):
 
@@ -52,23 +48,34 @@ class LoginViewSet(APIView):
         if user is not None:
             
             from .tokens import create_jwt_token
-            from .serializer import TokenSerializer
-            
-            get_token = Token.objects.get(user=user)
-            token_serializer = TokenSerializer(get_token)
             
             token       = create_jwt_token(user=user)
-            response    = {"message":"logged in","tokens":token,
-                           "UserToken":token_serializer.data}
+            response    = {"message":"logged in","tokens":token}
             return Response(data=response)
         return Response({"message":"credentials are not given ."})
-        
+    
+    
+    
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,OutstandingToken 
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        if self.request.data.get('all'):
+            token: OutstandingToken
+            for token in OutstandingToken.objects.filter(user=request.user):
+                _, _ = BlacklistedToken.objects.get_or_create(token=token)
+            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
+        refresh_token = self.request.data.get('refresh')
+        token = RefreshToken(token=refresh_token)
+        token.blacklist()
+        return Response({"status": "OK, goodbye"})
              
 class UserProfileViewSet(APIView):
     
     queryset                = Profile.objects.all()
     serializer_class        = ProfileSerializer
-    authentication_classes  = (TokenAuthentication,)
+    authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
     
@@ -76,11 +83,11 @@ class UserProfileViewSet(APIView):
         
         user    = request.user
         user_id = user.id
+        
         try :
             if Profile.objects.filter(user = user_id) :
-                
                 database    = Profile.objects.get(user = user_id)
-                serializer  = ProfileSerializer(database, many=False)   
+                serializer  = ProfileSerializer(database,many=False)   
                 return Response ({'data':serializer.data},status=status.HTTP_302_FOUND)
             
             else :
