@@ -2,14 +2,13 @@
 from .models import CricketPosts,PostFuntions
 from .serializers import *
 from rest_framework.views import APIView
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from users.models import Profile,Accounts
 from .backend import createPostFuntions
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from .logics_hosting.hosting import location
 
 
 
@@ -111,7 +110,6 @@ class CricketPostLikeFuntion(APIView):
         userID  =   user.id
         
         if CricketPosts.objects.get(id=pk):
-            
             postCALLED  = PostFuntions.objects.get(post_id=pk)
             
             if postCALLED.likes.filter(id=userID).exists():
@@ -120,9 +118,7 @@ class CricketPostLikeFuntion(APIView):
             else:
                 postCALLED.likes.add(userID)
                 return Response({'message':'added'})
-            
-            
-            
+        
 
 class CricketPostDislikeFuntion(APIView):
     
@@ -176,3 +172,36 @@ class PostInfoViewSet(APIView):
         serializer  = PostFuntionSerializer(getPost)
         return Response({'post review':serializer.data})
     
+    
+    
+    
+    
+                            # HOSTING TOURNAMENTS
+#   ______________________________________________________________________________________                          
+                            
+                            
+                            
+                            
+    
+class HostingTournament(APIView):
+    
+    serializer_class        = HostTournamentSerializer
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    
+    def post(self,request,*args,**kwargs):
+        
+        user        = request.user.id    
+        host        = Accounts.objects.get(id= user)
+        user        = HostCricketTournaments.objects.create(host=host)
+        serializer  = HostTournamentSerializer(user,data = request.data)
+                
+        if serializer.is_valid():          
+            serializer.save()
+            return Response({'data': serializer.data},status = status.HTTP_201_CREATED)
+                        
+        else:
+            return Response({'errors':serializer.errors},status = status.HTTP_400_BAD_REQUEST)
+        
+     

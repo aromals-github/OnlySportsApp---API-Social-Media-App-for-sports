@@ -1,5 +1,5 @@
 from rest_framework import  serializers
-from .models import CricketPosts,PostFuntions
+from .models import CricketPosts,PostFuntions,HostCricketTournaments
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -27,7 +27,16 @@ class PostFuntionSerializer(serializers.ModelSerializer):
         model   = PostFuntions
         fields  = ('likes','dislike','report','number_of_likes','number_of_dislikes')  
         
+           
+class HostTournamentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model   = HostCricketTournaments
+        fields  = ('tournament_name','venue','district','banner',
+                   'description','date','limit_participants','contact',
+                   'end_registration')
+        
         
 
         
-        
+         

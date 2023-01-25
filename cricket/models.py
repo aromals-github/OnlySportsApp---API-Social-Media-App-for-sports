@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import Accounts
-from django.core.exceptions import ValidationError
-from django.db.models.signals import m2m_changed
+from clubs.models import Clubs
+
 class CricketPosts(models.Model):
     
     
@@ -84,61 +84,43 @@ class HostCricketTournaments(models.Model):
           ("WA", 'Wayanad')
         )
    
-    host                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
-    tournament_name     = models.CharField(max_length=70,blank=True,null=True)
-    banner              = models.ImageField(upload_to='CricketTournaments',
-                                            blank= True, null=True)
-    district            = models.CharField(max_length=2,choices=DISTRICT_CHOICES,
-                                           null=True,blank= True)
-    venue               = models.CharField(max_length=70,blank=True,null=True)
-    date_added          = models.DateTimeField(auto_now_add = True, null = True,blank = True) 
-    description         = models.TextField(max_length=400,null=True,blank=True) 
-    date                = models.DateField(blank=True,null=True)
-    limit_participants  = models.IntegerField(blank=True,null=True)
+    host               = models.ForeignKey(Accounts,on_delete = models.CASCADE)
+    tournament_name    = models.CharField(max_length = 70,blank = True,null = True)
+    banner             = models.ImageField(upload_to='CricketTournaments',blank = True, null=True)
+    district           = models.CharField(max_length= 2,choices = DISTRICT_CHOICES,
+                                           null= True,blank= True)
+    venue              = models.CharField(max_length = 70,blank = True,null = True)
+    date_added         = models.DateTimeField(auto_now_add = True, null = True,blank = True) 
+    description        = models.TextField(max_length=1000,null=True,blank=True) 
+    date               = models.DateField(blank=True,null=True)
+    limit_participants = models.IntegerField(blank=True,null=True)
+    contact            = models.CharField(max_length=600,null=True,blank=True)
+    end_registration   = models.DateField(blank=True,null=True)
+    class Meta:
+        verbose_name_plural = "Cricket Tournaments"
+        verbose_name        = 'Cricket Tournament'
+
+
+class TeamsRegisteration(models.Model):
     
-
-
-
-class CricketClubs(models.Model):
+    tournament         = models.OneToOneField(HostCricketTournaments,on_delete= models.CASCADE)
+    registered_teams   = models.ManyToManyField(Clubs,related_name='clubs',blank=True)
     
-    DISTRICT_CHOICES = (
-          ("AL", 'Alappuzha'),
-          ("ER", 'Ernakulam'),
-          ("ID", 'Idukki'),
-          ("KN", 'Kannur'),
-          ("KS", 'Kasaragod'),
-          ("KL", 'Kollam'),
-          ("KT", 'Kottayam'),
-          ("KZ", 'Kozhikode'),
-          ("MA", 'Malapuram'),
-          ("PL", 'Palakkad'),
-          ("PT", 'Pathanmthitta'),
-          ("TV",'Thiruvanathapuram'),
-          ("TS", 'Thirssur'),
-          ("WA", 'Wayanad')
+    class Meta:
+        verbose_name_plural = "Team Registeration"
+       
+class ReportTournaments(models.Model):
+    
+    REPORT_TOURNAMENTS = (
+        ("FAKE", "Hosted tournament is a fake one."),
+        ("MISMATCH", 'Details given are not valid'),
+        ("SPAM", "Spam.")
     )
     
-    name                = models.CharField(max_length=90,null=True,blank=True)
-    owner               = models.ForeignKey(Accounts,on_delete=models.CASCADE,blank=True)
-    members             = models.ManyToManyField(Accounts,related_name="members",blank=True,
-                                                 error_messages={
-                                                        'max-limit':'max of 35 members'
-                                                        }
-                                                 )
-    district            = models.CharField(max_length=30,choices=DISTRICT_CHOICES,
+    tournament          = models.ForeignKey(HostCricketTournaments,on_delete=models.DO_NOTHING)
+    report              = models.CharField(max_length=100,choices=REPORT_TOURNAMENTS,
                                            null=True,blank=True)
     
-      
-def changes(sender,**kwargs):
-    if kwargs['instance'].members.count() > 35:
-        raise ValidationError('You cant have more than 30 members in a club')
-        
-m2m_changed.connect(changes,sender  = CricketClubs.members.through)
-
-
-
-class TeamsRegistered(models.Model):
-    
-    tournament          = models.OneToOneField(HostCricketTournaments,on_delete= models.CASCADE)
-    registered_teams    = models.ManyToManyField(CricketClubs,related_name='clubs')
-    
+    class Meta:
+        verbose_name_plural = "Tournament Reports"
+        verbose_name        = 'Report'

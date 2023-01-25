@@ -1,17 +1,15 @@
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Accounts,Profile
 from .serializer import SignUpSerializer,ProfileSerializer
 from rest_framework.request import Request
 from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,OutstandingToken 
+import requests
 class SignUpUserViewSet(APIView):
 
     serializer_class        = SignUpSerializer
@@ -54,10 +52,9 @@ class LoginViewSet(APIView):
             return Response(data=response)
         return Response({"message":"credentials are not given ."})
     
-    
-    
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,OutstandingToken 
+
 class LogoutView(APIView):
+    
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
@@ -65,11 +62,11 @@ class LogoutView(APIView):
             token: OutstandingToken
             for token in OutstandingToken.objects.filter(user=request.user):
                 _, _ = BlacklistedToken.objects.get_or_create(token=token)
-            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
+            return Response({"status": "all refresh tokens blacklisted"})
         refresh_token = self.request.data.get('refresh')
         token = RefreshToken(token=refresh_token)
         token.blacklist()
-        return Response({"status": "OK, goodbye"})
+        return Response({"status": "Logged out from every devices"})
              
 class UserProfileViewSet(APIView):
     
@@ -144,6 +141,4 @@ class UserProfileViewSet(APIView):
         except:     
            return Response(status=status.HTTP_102_PROCESSING)
     
-    
-
     

@@ -81,6 +81,24 @@ class Profile(models.Model):
     ]
     
     
+    DISTRICT_CHOICES = (
+          ("AL", 'Alappuzha'),
+          ("ER", 'Ernakulam'),
+          ("ID", 'Idukki'),
+          ("KN", 'Kannur'),
+          ("KS", 'Kasaragod'),
+          ("KL", 'Kollam'),
+          ("KT", 'Kottayam'),
+          ("KZ", 'Kozhikode'),
+          ("MA", 'Malapuram'),
+          ("PL", 'Palakkad'),
+          ("PT", 'Pathanmthitta'),
+          ("TV",'Thiruvanathapuram'),
+          ("TS", 'Thirssur'),
+          ("WA", 'Wayanad')
+        )
+    
+    
     games               = MultiSelectField(choices=GAME_CHOICE,
                                                   max_choices = 2,
                                                   max_length= 5,
@@ -92,6 +110,9 @@ class Profile(models.Model):
                                            auto_now=False,auto_now_add=False)
     profile_image       = models.ImageField(upload_to='profile_pictures',null=True,blank=True)
     bio                 = models.CharField(max_length =  500 ,blank = True)
+    district            = models.CharField(max_length= 2,choices = DISTRICT_CHOICES,
+                                           null= True,blank= True)
+    
     
     def age(self):
         
