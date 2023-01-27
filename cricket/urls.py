@@ -13,9 +13,9 @@ urlpatterns = [
     path('post/info/<int:pk>',views.PostInfoViewSet.as_view()),
     
     
-     path('host-tournament/',views.HostingTournament.as_view()),
+    path('host-tournament/',views.HostingTournament.as_view()),
+    path('info/tournament/<int:pk>',views.TournamentUpdateDelete.as_view()),
+     
     
     
-    
-    
-]
+    ]

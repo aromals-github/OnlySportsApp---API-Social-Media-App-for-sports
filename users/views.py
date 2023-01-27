@@ -88,7 +88,6 @@ class UserProfileViewSet(APIView):
                 return Response ({'data':serializer.data},status=status.HTTP_302_FOUND)
             
             else :
-                
                 response    = {'message':'There is no profile set for this user '}
                 return Response(response,status = status.HTTP_204_NO_CONTENT)
         except:

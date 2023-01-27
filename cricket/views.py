@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.models import Profile,Accounts
 from .backend import createPostFuntions
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .logics_hosting.hosting import location
+from .hosting_logics.hosting import *
 
 
 
@@ -24,7 +24,7 @@ class CricketPostsUploadView(APIView):
         try:
             user_logged     = request.user
             user_id         = user_logged.id
-
+           
             if Profile.objects.get(user = user_id):
                 profile= Profile.objects.get(user = user_id)
                 
@@ -189,19 +189,69 @@ class HostingTournament(APIView):
     authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
-    
     def post(self,request,*args,**kwargs):
         
         user        = request.user.id    
         host        = Accounts.objects.get(id= user)
         user        = HostCricketTournaments.objects.create(host=host)
         serializer  = HostTournamentSerializer(user,data = request.data)
-                
-        if serializer.is_valid():          
-            serializer.save()
-            return Response({'data': serializer.data},status = status.HTTP_201_CREATED)
-                        
-        else:
-            return Response({'errors':serializer.errors},status = status.HTTP_400_BAD_REQUEST)
+        verify_profile  = verify_user(request)
+            
+        if verify_profile == True:       
+            if serializer.is_valid():          
+                serializer.save()
+                return Response({'data': serializer.data},status = status.HTTP_201_CREATED)             
+            else:
+                return Response({'errors':serializer.errors},status = status.HTTP_400_BAD_REQUEST)
         
-     
+        elif verify_profile == 2:
+            return Response("Your are not 18 years old or above to host a tournament")
+        
+        elif verify_profile == 4:
+                return Response("You need to create or update your profile.")    
+        
+        else:
+             return Response({
+                 "Your profile is selected for other sports but not as for cricket or as general"
+                 })
+        
+        
+    def get(self,request,*args,**kwargs):
+        
+        all_tournaments = HostCricketTournaments.objects.all()
+        serializer      = HostTournamentSerializer(all_tournaments,many=True)
+        return Response({"data":serializer.data})
+        
+             
+class TournamentUpdateDelete(APIView):
+    
+    serializer_class        = TournamentSerializer
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostCricketTournaments.objects.all()
+    
+    def put(self,request,pk,*args,**kwargs) :
+        
+        user        = request.user.id       
+        if HostCricketTournaments.objects.filter(id=pk).filter(host=user):
+            tournament      = HostCricketTournaments.objects.get(id=pk)
+            serializer      = TournamentSerializer(tournament,data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)
+            else :
+                return Response({'errors':serializer.errors},status = 
+                                        status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"Your are not Hosting this tournaments to make any changes."})
+           
+    def delete(self,request,pk):
+        
+        user  = request.user.id
+        if HostCricketTournaments.objects.filter(id=pk).filter(host=user):
+            tournament    = HostCricketTournaments.objects.get(id=pk)
+            tournament.delete()
+            return Response({'message':'deleted'})
+        else:
+            return Response({'message':'You are the owner of the post.'}) 
+        

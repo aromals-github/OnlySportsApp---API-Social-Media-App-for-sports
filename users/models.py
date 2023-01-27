@@ -98,14 +98,14 @@ class Profile(models.Model):
           ("WA", 'Wayanad')
         )
     
-    
+    user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
     games               = MultiSelectField(choices=GAME_CHOICE,
                                                   max_choices = 2,
                                                   max_length= 5,
                                                   default=GENERAL)
     
     name                = models.CharField(max_length=40,blank=False,null=True)
-    user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
+    
     DOB                 = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=True,
                                            auto_now=False,auto_now_add=False)
     profile_image       = models.ImageField(upload_to='profile_pictures',null=True,blank=True)
