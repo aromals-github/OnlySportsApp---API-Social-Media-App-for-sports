@@ -253,5 +253,15 @@ class TournamentUpdateDelete(APIView):
             tournament.delete()
             return Response({'message':'deleted'})
         else:
-            return Response({'message':'You are the owner of the post.'}) 
+            return Response({'message':'You are not the owner of the post.'}) 
         
+        
+class RegistrationViewSet(APIView):
+    
+    # serializer_class        = 
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    def post(self,request,pk,*args,**kwargs):
+        
+        return Response(status=status.HTTP_100_CONTINUE)

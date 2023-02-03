@@ -15,7 +15,8 @@ urlpatterns = [
     
     path('host-tournament/',views.HostingTournament.as_view()),
     path('info/tournament/<int:pk>',views.TournamentUpdateDelete.as_view()),
-     
     
+    path('tournament/register/<int:pk>',views.RegistrationViewSet.as_view()),
+     
     
     ]
