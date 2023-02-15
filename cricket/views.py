@@ -191,10 +191,10 @@ class HostingTournament(APIView):
     
     def post(self,request,*args,**kwargs):
         
-        user        = request.user.id    
-        host        = Accounts.objects.get(id= user)
-        user        = HostCricketTournaments.objects.create(host=host)
-        serializer  = HostTournamentSerializer(user,data = request.data)
+        user_id         = request.user.id    
+        host            = Accounts.objects.get(id= user_id)
+        user            = HostCricketTournaments.objects.create(host=host)
+        serializer      = HostTournamentSerializer(user,data = request.data)
         verify_profile  = verify_user(request)
             
         if verify_profile == True:       

@@ -63,14 +63,12 @@ class ClubUpdateDeleteViewSet(APIView):
     def delete(self,request,pk):
         
         user =  request.user.id
-        
         if Clubs.objects.filter(id=pk).filter(owner=user):
             club = Clubs.objects.get(id=pk)
             club.delete()
             return Response({"Deleted"})
         else:
-            return Response({"You are no the owner for the club or the Club doesnt not exist"})
-        
+            return Response({"You are no the owner for the club or the Club doesnt not exist"})    
 class ClubInfoViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
@@ -88,7 +86,60 @@ class ClubInfoViewSet(APIView):
             AllClubs = Clubs.objects.all()
             serializer = ClubInfoViewSerializer(AllClubs,many=True)
             return Response({"all clubs":serializer.data})
+        
+class ClubMembershipViewSet(APIView):
+    
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = MembershipRequest.objects.all()
+    
+    
+    ''' ** MEMBERSHIP **
+        -> Users can cancel the request at any time .
+        -> 3 Possible Responses
+    '''
+
+
+    def post(self,request,pk,action): 
+        
+        try:
+            if Clubs.objects.get(id=pk):
+                if action == 1:
+                    user    = request.user.id 
+                    account = Accounts.objects.get(id=user)
+                    print(account)
+                    club_requested = Clubs.objects.get(id=pk)
+    
+                    if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user):  
+                        return Response ({"Request is pending"})
+                    else:
+                        
+                        if MembershipRequest.objects.filter(club=pk).filter(is_active=False).filter(sender=user):
+                            return Response({"You are already a member of the club"})
+                        else:
+                            instance = MembershipRequest(club=club_requested,sender=account)
+                            instance.save()
+                            return Response({"Requested"})
+                    
+                elif action == 0:
+                    user    = request.user.id 
+                    account = Accounts.objects.get(id=user)
+                    club_requested = Clubs.objects.get(id=pk)
+
+                    if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user): 
+                        instance = MembershipRequest.objects.get(club=club_requested,sender=account) 
+                        instance.delete()
+                        return Response ({"Cancelled"})
+                    else:
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
+                 
+                else:
+                    return Response({"error":"URL-/<int:action> || value should be 1 (Send Request) or 0 (Cancel Request)."})
             
+        except:
+             return Response({"ERROR WITH SELECTED CLUB":"This club is either terminated or never existed."})         
+         
+         
 class ClubAdminsViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)

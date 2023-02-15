@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,OutstandingToken 
-import requests
+from .tokens import create_jwt_token
 class SignUpUserViewSet(APIView):
 
     serializer_class        = SignUpSerializer
@@ -40,12 +40,9 @@ class LoginViewSet(APIView):
          
         email      = request.data.get("email")
         password   = request.data.get("password")
-         
         user       = authenticate(email=email,password=password)
         
         if user is not None:
-            
-            from .tokens import create_jwt_token
             
             token       = create_jwt_token(user=user)
             response    = {"message":"logged in","tokens":token}

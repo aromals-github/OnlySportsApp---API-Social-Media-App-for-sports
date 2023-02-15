@@ -27,3 +27,9 @@ class ClubInfoViewSerializer(serializers.ModelSerializer):
     class Meta:
         model   = Clubs
         fields  = ('name','owner','games','logo','district')
+        
+class ClubMembershipSerializer(serializers.ModelField):
+    
+    class Meta:
+        model   = Clubs
+        fields  = ('is_active',)

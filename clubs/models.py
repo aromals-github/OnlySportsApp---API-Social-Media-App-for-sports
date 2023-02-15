@@ -40,6 +40,9 @@ class Clubs(models.Model):
     owner         = models.ForeignKey(Accounts,on_delete=models.CASCADE,blank=True)
     class Meta:
         verbose_name_plural = "Clubs"  
+    
+    def __str__(self):
+        return self.name
       
 def changes(sender,**kwargs):
     if kwargs['instance'].members.count() > 60:
@@ -47,6 +50,49 @@ def changes(sender,**kwargs):
 m2m_changed.connect(changes,sender  = Clubs.members.through)
 
 
+
+class MembershipRequest(models.Model):
+    
+    '''changes needs to be done in production
+    
+        1. sender should not be null 
+        
+    '''
+    
+    club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=False)
+    sender      = models.ForeignKey(Accounts,blank=True,null=True,on_delete=models.CASCADE) 
+    is_active   = models.BooleanField(blank=True,null=False,default=True)
+    timestamp   = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = "Membership Requests"
+        
+    def name(self):
+        getClub = self.club.id
+        Club = Clubs.objects.get(id=getClub)  
+        return (Club.name)
+    
+    def owner(self):
+        getClub = self.club.id
+        Club = Clubs.objects.get(id=getClub)
+        return(Club.owner)
+
+
+
+class MembershipResponses(models.Model):
+    
+    club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=True)
+    accepted    = models.ManyToManyField(Accounts,related_name="accepted",blank=True)
+    declined    = models.ManyToManyField(Accounts,related_name="declined",blank=True)
+    
+    def __str__(self):
+        return self.club
+    class Meta:
+        verbose_name_plural = "Membership Responses"
+        
+        
+        
+        
 class ClubAdmins(models.Model):
     
     club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=False)
