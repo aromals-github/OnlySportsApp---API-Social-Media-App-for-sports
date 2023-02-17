@@ -1,4 +1,4 @@
-from clubs.models import Clubs
+from clubs.models import *
 from users.models import Accounts,Profile
 
 def clubRepo(request):
@@ -8,6 +8,26 @@ def clubRepo(request):
     else :
         return (1)# No clubs exists for this user thus a new club can be created
     
-
-
+def membershipList(request,club):
+    user = request.user.id
+    
+    if MembershipResponses.objects.filter(club=club):
+        request_club = Clubs.objects.get(id=club)
+        store = MembershipResponses.objects.get(club=request_club)
+        if request_club.owner.id == user:
+            return(False)
+        else:
+            store.waiting.add(user)
+            return True
+    else:
+        request_club = Clubs.objects.get(id=club)
+        store = MembershipResponses.objects.create(club=request_club)
+        if request_club.owner.id == user:
+            return(False)
+        else:
+            store.waiting.add(user)
+            return True
+        
+        
+        
 

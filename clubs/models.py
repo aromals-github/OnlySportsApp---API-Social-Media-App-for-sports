@@ -66,15 +66,17 @@ class MembershipRequest(models.Model):
     
     class Meta:
         verbose_name_plural = "Membership Requests"
+    
+    def sender_name(self):
+        account = Accounts.objects.get(id=self.sender.id)
+        return (account.username)
         
     def name(self):
-        getClub = self.club.id
-        Club = Clubs.objects.get(id=getClub)  
+        Club = Clubs.objects.get(id=self.club.id)  
         return (Club.name)
     
     def owner(self):
-        getClub = self.club.id
-        Club = Clubs.objects.get(id=getClub)
+        Club = Clubs.objects.get(id=self.club.id)
         return(Club.owner)
 
 
@@ -83,10 +85,11 @@ class MembershipResponses(models.Model):
     
     club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=True)
     accepted    = models.ManyToManyField(Accounts,related_name="accepted",blank=True)
-    declined    = models.ManyToManyField(Accounts,related_name="declined",blank=True)
+    blocked    = models.ManyToManyField(Accounts,related_name="blocked",blank=True)
+    waiting     = models.ManyToManyField(Accounts,related_name="waiting",blank=True)
     
     def __str__(self):
-        return self.club
+        return self.club.name
     class Meta:
         verbose_name_plural = "Membership Responses"
         
