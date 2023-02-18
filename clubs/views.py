@@ -77,8 +77,7 @@ class ClubInfoViewSet(APIView):
     queryset                = Clubs.objects.all()
     
     def get(self,request,pk):
-        # Member or not
-        
+
         if Clubs.objects.get(id=pk):
             club = Clubs.objects.get(id=pk)
             serializer = ClubInfoViewSerializer(club)
@@ -96,21 +95,17 @@ class ClubMembershipViewSet(APIView):
     permission_classes      = (IsAuthenticated,)
     queryset                = MembershipRequest.objects.all()
     
-    
     ''' ** MEMBERSHIP **
         -> Users can cancel the request at any time .
         -> 3 Possible Responses
     '''
-
-
     def post(self,request,pk,action): 
         
         try:
-            
             if Clubs.objects.get(id=pk):
                 
                 if MembershipResponses.objects.filter(club=pk,blocked=request.user.id):
-                    return Response({"You are blocked"})
+                    return Response({"Status":"You are blocked"})
                 else:
                     
                     list_created = membershipList(request,pk) ; '''CREATE LIST FOR MEMBERS'''
@@ -120,23 +115,23 @@ class ClubMembershipViewSet(APIView):
                         club_requested = Clubs.objects.get(id=pk)
                         
                         if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user):  
-                            return Response ({"Request is pending"})
+                            return Response ({"Status":"Request is pending"})
                         
                         else:
                             if MembershipRequest.objects.filter(club=pk).filter(is_active=False).filter(sender=user):
-                                return Response({"You are already a member of the club"})
+                                return Response({"Status":"You are already a member of the club"})
                             else:
-                                if list_created ==False:
+                                if list_created == False:
                                     return Response({"Owner is assigned to all roles in club by default."})
                                 else:
                                     instance = MembershipRequest(club=club_requested,sender=account)
                                     instance.save()
-                                    return Response({"Requested"})
+                                    return Response({"Status":"Requested"})
                     
                     elif action == 0:
-                        user    = request.user.id 
-                        account = Accounts.objects.get(id=user)
-                        club_requested = Clubs.objects.get(id=pk)
+                        user            = request.user.id 
+                        account         = Accounts.objects.get(id=user)
+                        club_requested  = Clubs.objects.get(id=pk)
 
                         if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user): 
                             instance = MembershipRequest.objects.get(club=club_requested,sender=account) 
@@ -181,7 +176,7 @@ class ClubMembershipResponse(APIView):
                              
                         club_model_accepted = Clubs.objects.get(id=pk)
                         club_model_accepted.members.add(user)
-                        return Response({"Accepted"})
+                        return Response({"Status":"Accepted"})
                     
                     elif action == 0:
                         
@@ -189,7 +184,7 @@ class ClubMembershipResponse(APIView):
                         response_model_declined.waiting.remove(user)
                         membership_model_declined = MembershipRequest.objects.get(club=pk,sender=account,is_active=True)
                         membership_model_declined.delete()
-                        return Response({"Declined"})
+                        return Response({"Status":"Declined"})
                     
                     elif action == 2 :
                         
@@ -198,7 +193,7 @@ class ClubMembershipResponse(APIView):
                         response_model_blocked.blocked.add(user)
                         membership_model_blocked = MembershipRequest.objects.get(club=pk,sender=account,is_active=True)
                         membership_model_blocked.delete()
-                        return Response({"Blocked"})
+                        return Response({"Status":"Blocked"})
                     
                     else:
                         return Response({"Invalid Response, || URL "})
@@ -207,8 +202,33 @@ class ClubMembershipResponse(APIView):
             else:
                 return Response({"Club does not exists."})
         except:
-            return Response({"Error: No Request to Respond or Invalid action"})
+            return Response({"Error": "No Request to Respond or Invalid action"})
 
+class RemoveMemberClubViewSet(APIView):
+    
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = Clubs.objects.all()
+    
+    def post(self,request,club,removee):
+        try:
+            if Clubs.objects.get(id=club):
+                getClub = Clubs.objects.get(id=club)
+                if getClub.owner.id == request.user.id:
+                    if Clubs.objects.filter(id=club).filter(members=removee):
+                        club_called = Clubs.objects.get(id=club)
+                        club_called.members.remove(removee)
+                        membership_responses_model  = MembershipResponses.objects.get(club=club)
+                        membership_responses_model.accepted.remove(removee)
+                        membership_request_model    = MembershipRequest.objects.get(club=club,sender=removee)
+                        membership_request_model.delete()
+                        return Response({"Success Message":"Removed from club"})
+                    else:
+                        return Response({"Not Found":"Not a member"})
+                else:
+                    return Response({"Access Error":"Not the Owner or an Admin "})
+        except:
+            return Response({"Error"})
 
 class ViewAllRequestsViewSet(APIView):
     authentication_classes  = (JWTAuthentication,)

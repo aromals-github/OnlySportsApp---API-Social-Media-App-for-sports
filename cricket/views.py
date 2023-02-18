@@ -212,7 +212,7 @@ class HostingTournament(APIView):
         
         else:
              return Response({
-                 "Your profile is selected for other sports but not as for cricket or as general"
+                 "Your profile is selected for other sports but not as for cricket "
                  })
         
         
@@ -265,3 +265,4 @@ class RegistrationViewSet(APIView):
     def post(self,request,pk,*args,**kwargs):
         
         return Response(status=status.HTTP_100_CONTINUE)
+    

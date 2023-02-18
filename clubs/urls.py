@@ -9,6 +9,8 @@ urlpatterns = [
     path('request/membership/<int:pk>/<int:action>',views.ClubMembershipViewSet.as_view()),
     path('response/membership/<int:pk>/<int:user>/<int:action>',views.ClubMembershipResponse.as_view()),
     
+    path('member/remove/<int:club>/<int:removee>',views.RemoveMemberClubViewSet.as_view()),
+    
     path('membership/requests/<int:pk>',views.ViewAllRequestsViewSet.as_view()),
     path('club-admins/<int:pk>',views.ClubAdminsViewSet.as_view()),
 ]
