@@ -15,7 +15,7 @@ class ClubMembershipRequest(admin.ModelAdmin):
     
 @admin.register(ClubAdmins)
 class ClubAdmin(admin.ModelAdmin):
-    list_display = ('club_name','owner')
+    list_display = ('club_name','owner','admin_count')
     
 
 

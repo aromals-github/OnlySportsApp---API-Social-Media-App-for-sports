@@ -31,6 +31,3 @@ def membershipList(request,club):
             store.waiting.add(user)
             return True
         
-        
-        
-

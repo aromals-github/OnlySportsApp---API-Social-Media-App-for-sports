@@ -38,6 +38,8 @@ class Clubs(models.Model):
     logo          = models.ImageField(upload_to='clubs logos',blank=True,null=True)
     district      = models.CharField(max_length=30,choices=DISTRICT_CHOICES,null=True,blank=True)
     owner         = models.ForeignKey(Accounts,on_delete=models.CASCADE,blank=True)
+    admins        = models.ManyToManyField(Accounts,related_name="admins",blank=True)
+    
     class Meta:
         verbose_name_plural = "Clubs"  
     
@@ -85,7 +87,7 @@ class MembershipResponses(models.Model):
     
     club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=True)
     accepted    = models.ManyToManyField(Accounts,related_name="accepted",blank=True)
-    blocked    = models.ManyToManyField(Accounts,related_name="blocked",blank=True)
+    blocked     = models.ManyToManyField(Accounts,related_name="blocked",blank=True)
     waiting     = models.ManyToManyField(Accounts,related_name="waiting",blank=True)
     
     def __str__(self):
@@ -100,7 +102,7 @@ class ClubAdmins(models.Model):
     
     club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=False)
     clubAdmins  = models.ManyToManyField(Accounts,related_name="Club_Admins",blank=True)
-    
+    time_stamp  = models.DateTimeField(auto_now_add=True,blank=True,null=True)
     class Meta:
         verbose_name_plural = "Club Admins"
     
@@ -118,6 +120,11 @@ class ClubAdmins(models.Model):
         Club = Clubs.objects.get(id=getClub)
         owner = Club.owner
         return(owner)
+    
+    def admin_count(self):
+        
+        count = self.clubAdmins.count()
+        return(count)
     
 
 def changes_Admin(sender,**kwargs):

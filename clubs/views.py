@@ -8,7 +8,6 @@ from clubs.clubLOGICS.clublogics import *
 from users.models import Profile
 from .serializers import *
 
-
 class ResgisterClubViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
@@ -25,7 +24,7 @@ class ResgisterClubViewSet(APIView):
         print(get_profile.games)
         
         if (userClub in get_profile.games or 'G' in get_profile.games):
-                if verifyUser ==1:
+                if verifyUser == 1:
                     user        = Accounts.objects.get(id=loggedInUser)
                     admin       = Clubs.objects.create(owner=user)
                     serializer  = ClubSerializer(admin,data=request.data)
@@ -37,7 +36,9 @@ class ResgisterClubViewSet(APIView):
                 elif verifyUser==0:
                     return Response ({'You are already an owner for a club'})
         else:
-            return Response ({"Profile doesn't match with selected game."})
+            return Response ({"Profile  doesn't match with selected game."})
+        
+        
 class ClubUpdateDeleteViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
@@ -68,7 +69,8 @@ class ClubUpdateDeleteViewSet(APIView):
             club.delete()
             return Response({"Deleted"})
         else:
-            return Response({"You are no the owner for the club or the Club doesnt not exist"})    
+            return Response({"You are no the owner for the club or the Club doesnt not exist"})  
+          
 class ClubInfoViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
@@ -77,17 +79,21 @@ class ClubInfoViewSet(APIView):
     queryset                = Clubs.objects.all()
     
     def get(self,request,pk):
-
-        if Clubs.objects.get(id=pk):
-            club = Clubs.objects.get(id=pk)
-            serializer = ClubInfoViewSerializer(club)
-            return Response({"club details": serializer.data})
-        elif pk==0:
-            AllClubs = Clubs.objects.all()
-            serializer = ClubInfoViewSerializer(AllClubs,many=True)
-            return Response({"all clubs":serializer.data})
-        else:
-            return Response({"No club exists"})
+        try:
+            if pk != 0:
+                if Clubs.objects.filter(id=pk):
+                    club = Clubs.objects.get(id=pk)
+                    serializer = ClubInfoViewSerializer(club)
+                    return Response({"club details": serializer.data})
+                else:
+                    return Response({"No club exists"})
+            
+            elif pk==0:
+                AllClubs = Clubs.objects.all()
+                serializer = ClubInfoViewSerializer(AllClubs,many=True)
+                return Response({"all clubs":serializer.data})
+        except:
+            return Response({"Unknown error"})
         
 class ClubMembershipViewSet(APIView):
     
@@ -158,7 +164,7 @@ class ClubMembershipResponse(APIView):
         try:
             if MembershipResponses.objects.get(club=pk):
                 club = Clubs.objects.get(id=pk)
-                if club.owner.id == request.user.id:
+                if club.owner.id == request.user.id :
                     account = Accounts.objects.get(id=user)
                     if action == 1:
                         
@@ -167,13 +173,11 @@ class ClubMembershipResponse(APIView):
                         response_model_accepted.accepted.add(user)
                         
                         if MembershipRequest.objects.get(club=pk,sender=account,is_active=True):
-                            
                             membership_model_accepted = MembershipRequest.objects.get(club=pk,sender=account,is_active=True)
                             membership_model_accepted.delete()
                             club_requested = Clubs.objects.get(id=pk)
                             new_instance_accepted = MembershipRequest(club=club_requested,sender=account,is_active=False)
-                            new_instance_accepted.save()  
-                             
+                            new_instance_accepted.save()                               
                         club_model_accepted = Clubs.objects.get(id=pk)
                         club_model_accepted.members.add(user)
                         return Response({"Status":"Accepted"})
@@ -187,14 +191,13 @@ class ClubMembershipResponse(APIView):
                         return Response({"Status":"Declined"})
                     
                     elif action == 2 :
-                        
                         response_model_blocked = MembershipResponses.objects.get(club=pk)
                         response_model_blocked.waiting.remove(user)
                         response_model_blocked.blocked.add(user)
                         membership_model_blocked = MembershipRequest.objects.get(club=pk,sender=account,is_active=True)
                         membership_model_blocked.delete()
                         return Response({"Status":"Blocked"})
-                    
+            
                     else:
                         return Response({"Invalid Response, || URL "})
                 else:
@@ -240,12 +243,12 @@ class ViewAllRequestsViewSet(APIView):
         
         try:
             club    = Clubs.objects.get(id=pk)
-            if club.owner.id == request.user.id:
+            if ((club.owner.id == request.user.id)or(Clubs.objects.filter(id=pk,admins=request.user.id))):
                 _requests   = MembershipRequest.objects.filter(club=pk,is_active=True)
                 serializer  = MembershipRequestSerializer(_requests,many=True)
                 return Response({"requested members":serializer.data})
             else:
-                return Response({"Not an owner"})
+                return Response({"Your are not the owner or the admin of for the club."})
         except:
             return Response({"There is no club with the given 'ID'"})
         
@@ -254,10 +257,40 @@ class ClubAdminsViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
-    serializer_class        = ClubsAdminSerializer
-    queryset                = Clubs.objects.all()
     
-    def post(self,request,pk):
+    def post(self,request,pk,user):
         
-        return Response(status=status.HTTP_100_CONTINUE)
-    
+        try:
+            club    = Clubs.objects.get(id=pk)
+            if club.owner.id == request.user.id:
+                if Clubs.objects.filter(id=pk,members=user):
+                    ClubAdmins.objects.get_or_create(club=club)
+                    addAdmin = ClubAdmins.objects.get(club=pk)
+                    addAdmin.clubAdmins.add(user)
+                    club.admins.add(user)
+                    return Response({"Admin added"})       
+                else:
+                    return Response({"Membership":"Not an member for the club to be an admin."})
+            else:
+                return Response({"You are not the owner for the club  inorder to add or remove a admin."})
+        except:
+            return Response({"Error"})
+        
+    def delete(self,request,pk,user):
+        
+        try:
+            club    = Clubs.objects.get(id=pk)
+            if club.owner.id == request.user.id:
+                if Clubs.objects.filter(id=pk,admins=user):
+                    clubAdmin = ClubAdmins.objects.get(club=pk)
+                    clubAdmin.clubAdmins.remove(user)
+                    club.admins.remove(user)
+                    return Response({"Status":"Removed from Admins"})
+                else:
+                    return Response({"Not an Admin"})
+            else:  
+                return Response({"Error":"Only owner of the club can remove admins."})
+            
+        except:
+            return Response({"Club not found or error in loading admins"})
+        
