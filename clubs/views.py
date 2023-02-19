@@ -164,7 +164,7 @@ class ClubMembershipResponse(APIView):
         try:
             if MembershipResponses.objects.get(club=pk):
                 club = Clubs.objects.get(id=pk)
-                if club.owner.id == request.user.id :
+                if ((club.owner.id == request.user.id)or(Clubs.objects.filter(id=pk,admins=request.user.id))) :
                     account = Accounts.objects.get(id=user)
                     if action == 1:
                         
@@ -217,7 +217,7 @@ class RemoveMemberClubViewSet(APIView):
         try:
             if Clubs.objects.get(id=club):
                 getClub = Clubs.objects.get(id=club)
-                if getClub.owner.id == request.user.id:
+                if ((getClub.owner.id == request.user.id)or(Clubs.objects.filter(id=club,admins=request.user.id))):
                     if Clubs.objects.filter(id=club).filter(members=removee):
                         club_called = Clubs.objects.get(id=club)
                         club_called.members.remove(removee)
@@ -266,9 +266,13 @@ class ClubAdminsViewSet(APIView):
                 if Clubs.objects.filter(id=pk,members=user):
                     ClubAdmins.objects.get_or_create(club=club)
                     addAdmin = ClubAdmins.objects.get(club=pk)
-                    addAdmin.clubAdmins.add(user)
-                    club.admins.add(user)
-                    return Response({"Admin added"})       
+                    print(addAdmin.admin_count())
+                    if addAdmin.admin_count() >= 5:
+                        return Response ({"Admin Limit": "Admin limit reached to add new admin ,remove an existing one."})
+                    else:
+                        addAdmin.clubAdmins.add(user)
+                        club.admins.add(user)
+                        return Response({"Admin added"})       
                 else:
                     return Response({"Membership":"Not an member for the club to be an admin."})
             else:
