@@ -72,11 +72,11 @@ class Profile(models.Model):
     
     FOOTBALL    = "F"
     CRICKET     = "C"
-    GENERAL     = "G"   
+    ALL     = "A"   
     GAME_CHOICE      = [
         (CRICKET, "Cricket"),
         (FOOTBALL, "Football"),
-        (GENERAL, "General")
+        (ALL, "All")
     ]
     
     
@@ -98,10 +98,7 @@ class Profile(models.Model):
         )
     
     user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
-    games               = MultiSelectField(choices=GAME_CHOICE,
-                                                  max_choices = 2,
-                                                  max_length= 5,
-                                                  default=GENERAL)
+    games               = models.CharField(choices=GAME_CHOICE,max_length= 5,default=ALL)
     
     name                = models.CharField(max_length=40,blank=False,null=True)
     
