@@ -19,7 +19,7 @@ admin.site.register(Accounts,AccountsAdmin)
 @admin.register(Profile)
 class ProfileHolder(admin.ModelAdmin):
     list_display        = ('user','name','age','district')
-    search_fields       = ('user','district')
+    search_fields       = ('district','name')
     filter_horizontal   = ()
     list_filter         = ('district',)
     fieldsets           = ()
