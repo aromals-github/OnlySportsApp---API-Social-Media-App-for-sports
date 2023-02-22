@@ -19,7 +19,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta :
         model           = Profile
-        fields          = ('games','profile_image','DOB','bio','name')      
+        fields          = ('games','profile_image','DOB','bio','name','district')      
         
         
 class TokenSerializer(serializers.ModelSerializer):

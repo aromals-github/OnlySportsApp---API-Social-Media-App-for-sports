@@ -4,7 +4,6 @@ from django.contrib.auth.models import PermissionsMixin
 from datetime import date
 from multiselectfield import MultiSelectField
 
-
 class AccountsManager(BaseUserManager):
     
     use_in_migrations = True
@@ -68,7 +67,7 @@ class Accounts(AbstractBaseUser):
     class Meta:
         verbose_name_plural = "Accounts"
         
-        
+      
 class Profile(models.Model):
     
     FOOTBALL    = "F"
@@ -113,7 +112,6 @@ class Profile(models.Model):
     district            = models.CharField(max_length= 2,choices = DISTRICT_CHOICES,
                                            null= True,blank= True)
     
-    
     def age(self):
         
         today  = date.today() 
@@ -128,4 +126,6 @@ class Profile(models.Model):
             return today.year -self.DOB.year
         
   
-        
+    def __str__(self):
+        return self.user.username
+    

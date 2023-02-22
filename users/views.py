@@ -10,6 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,OutstandingToken 
 from .tokens import create_jwt_token
+from .services import createClubHistory
 class SignUpUserViewSet(APIView):
 
     serializer_class        = SignUpSerializer
@@ -52,19 +53,23 @@ class LoginViewSet(APIView):
 
 class LogoutView(APIView):
     
+    authentication_classes  = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
-        if self.request.data.get('all'):
-            token: OutstandingToken
-            for token in OutstandingToken.objects.filter(user=request.user):
-                _, _ = BlacklistedToken.objects.get_or_create(token=token)
-            return Response({"status": "all refresh tokens blacklisted"})
-        refresh_token = self.request.data.get('refresh')
-        token = RefreshToken(token=refresh_token)
-        token.blacklist()
-        return Response({"status": "Logged out from every devices"})
-             
+        try:
+            if self.request.data.get('all'):
+                token: OutstandingToken
+                for token in OutstandingToken.objects.filter(user=request.user):
+                    _, _ = BlacklistedToken.objects.get_or_create(token=token)
+                return Response({"status": "all refresh tokens blacklisted"})
+            refresh_token = self.request.data.get('refresh')
+            token = RefreshToken(token=refresh_token)
+            token.blacklist()
+            return Response({"status": "Logged out "})
+        except:
+            return Response({"Already logged out or Server Error"})
+                
 class UserProfileViewSet(APIView):
     
     queryset                = Profile.objects.all()
@@ -108,6 +113,7 @@ class UserProfileViewSet(APIView):
             
             if serializer.is_valid():
                 serializer.save()
+                createClubHistory(request)
                 return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)
             
             else:
