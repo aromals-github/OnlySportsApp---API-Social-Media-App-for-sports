@@ -31,12 +31,12 @@ class Clubs(models.Model):
         (FOOTBALL, "Football"),
         (ALL,"All")
     ]
-    name          = models.CharField(max_length=90,null=True,blank=True)
-    games         = models.CharField(max_length=2,choices=GAME_CHOICE,blank=True)
+    name          = models.CharField(max_length=90,null=False,blank=False)
+    games         = models.CharField(max_length=2,choices=GAME_CHOICE,blank=False)
     members       = models.ManyToManyField(Accounts,related_name="members",blank=True,
                                                 error_messages={'max-limit':'max of 60 members'}) 
     logo          = models.ImageField(upload_to='clubs logos',blank=True,null=True)
-    district      = models.CharField(max_length=30,choices=DISTRICT_CHOICES,null=True,blank=True)
+    district      = models.CharField(max_length=30,choices=DISTRICT_CHOICES,null=True,blank=False)
     owner         = models.ForeignKey(Accounts,on_delete=models.CASCADE,blank=True)
     admins        = models.ManyToManyField(Accounts,related_name="admins",blank=True)
     
@@ -81,7 +81,8 @@ class MembershipRequest(models.Model):
         Club = Clubs.objects.get(id=self.club.id)
         return(Club.owner)
 
-
+    def __str__(self):
+        return self.club.name
 
 class MembershipResponses(models.Model):
     
@@ -93,10 +94,8 @@ class MembershipResponses(models.Model):
     def __str__(self):
         return self.club.name
     class Meta:
-        verbose_name_plural = "Membership Responses"
-        
-        
-        
+        verbose_name_plural = "Club Membership Responses"
+         
         
 class ClubAdmins(models.Model):
     
@@ -104,7 +103,10 @@ class ClubAdmins(models.Model):
     clubAdmins  = models.ManyToManyField(Accounts,related_name="Club_Admins",blank=True)
     time_stamp  = models.DateTimeField(auto_now_add=True,blank=True,null=True)
     class Meta:
-        verbose_name_plural = "Club Admins"
+        verbose_name_plural = "Club and Admins"
+        
+    def __str__(self):
+        return self.club.name
     
     def club_name(self):
         
@@ -132,4 +134,24 @@ def changes_Admin(sender,**kwargs):
         raise ValidationError('You cant have more than 5 members as admins')       
 m2m_changed.connect(changes_Admin,sender  = ClubAdmins.clubAdmins.through)
   
+
+
+class ClubHistoryPerUser(models.Model):
     
+    user                = models.ForeignKey(Accounts,on_delete=models.CASCADE,blank=True,null=True)        
+    owner               = models.BooleanField(default=False)
+    club_member         = models.ManyToManyField("clubs.Clubs",related_name="member",blank=True)
+    club_admin          = models.ManyToManyField("clubs.Clubs",related_name="admin",blank=True)
+    
+    class Meta:
+        verbose_name_plural = "Club History of Users"
+        
+    def __str__(self):
+        return self.user.username
+
+    
+    def total_membership(self):
+        return self.club_member.count()
+    
+    def total_admin(self):
+        return self.club_admin.count()

@@ -1,15 +1,22 @@
 from clubs.models import *
-from users.models import Accounts,Profile
-
+from users.models import *
 
 
 def clubRepo(request):
     user_ID = request.user.id    
-    if Clubs.objects.filter(owner=user_ID):
-        return(0) #If user exist return 1 means a clubs exist for this user as owner.
+    if ClubHistoryPerUser.objects.filter(user =request.user.id,owner=True):
+        return(0)
+        
     else :
-        return (1)# No clubs exists for this user thus a new club can be created
- 
+        getHistory = ClubHistoryPerUser.objects.get(user=request.user.id)
+        print (getHistory.total_admin)
+        if getHistory.total_admin() > 0 or getHistory.total_membership() > 0:
+            return (0)
+        else:
+            return (1)      
+
+def updateClubHistory(request):
+    ClubHistoryPerUser.objects.filter(user=request.user.id).update(owner=True)     
     
 def membershipList(request,club):
     user = request.user.id
