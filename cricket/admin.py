@@ -1,32 +1,13 @@
 from django.contrib import admin
-from .models import (CricketPosts,PostFuntions,HostCricketTournaments,
-                     TeamsRegisteration,ReportTournaments)
+from .models import *
 
-
-@admin.register(CricketPosts)
-class CricketPosts(admin.ModelAdmin):
-    list_display = ('title','date','id','user')
-
-
-@admin.register(PostFuntions)
-class PostFuntions(admin.ModelAdmin):
-    list_display = ('id','post_id','report','number_of_likes','number_of_dislikes')
-    
     
 @admin.register(HostCricketTournaments)
 class HostTournaments(admin.ModelAdmin):
-    list_display = ('id','tournament_name',)
-    
-    
+    list_display = ('tournament_name','id','host')
     
 
-@admin.register(TeamsRegisteration)
-class Registeration(admin.ModelAdmin):
-    list_display = ('id','tournament')
-    
-
-
-@admin.register(ReportTournaments)
-class Registeration(admin.ModelAdmin):
-    list_display = ('id','tournament')
+@admin.register(Tournament_Notifications)
+class HostTournaments(admin.ModelAdmin):
+    list_display = ('tournament','verified','cancelled','reported')
     

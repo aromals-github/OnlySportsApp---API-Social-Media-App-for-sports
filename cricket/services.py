@@ -8,7 +8,7 @@ def verify_user(request):
         return(4)
     else:
         profile = Profile.objects.get(user=user)
-        if (('C' in profile.games) or ('G' in profile.games )):
+        if (('C' in profile.games) or ('A' in profile.games )):
             age         = profile.age()
             if age>=18:
                 return (True)
