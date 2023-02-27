@@ -42,7 +42,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 class TournamentViewSerializer(serializers.ModelSerializer):
     class Meta:
         model   = HostCricketTournaments
-        fields  = ('tournament_name','venue','district','banner',
+        fields  = ('id','tournament_name','venue','district','banner',
                    'description','date','limit_participants','contact',
-                   'end_registration','id','date_added')
+                   'end_registration','date_added','registered_teams')
         

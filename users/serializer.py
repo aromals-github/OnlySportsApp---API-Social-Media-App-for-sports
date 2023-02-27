@@ -19,8 +19,19 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta :
         model           = Profile
-        fields          = ('games','profile_image','DOB','bio','name','district')      
+        fields          = ('games','profile_image','DOB','bio','name','district')     
         
+class ProfileViewSerializer(serializers.ModelSerializer):
+    
+    class Meta :
+        model           = Profile
+        fields          = ('games','profile_image','DOB','bio','name','district','id')       
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    
+    class Meta :
+        model           = Profile
+        fields          = ('games','profile_image','DOB','bio','name')  
         
 class TokenSerializer(serializers.ModelSerializer):
     

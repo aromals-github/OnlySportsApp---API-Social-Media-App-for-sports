@@ -20,10 +20,16 @@ class ClubInfoViewSerializer(serializers.ModelSerializer):
     
     class Meta:
         model   = Clubs
-        fields  = ('name','owner','games','logo','district','members')
+        fields  = ('id','name','owner','games','logo','district','members','admins','name_admins','name_members')
 
 class MembershipRequestSerializer(serializers.ModelSerializer):
     
     class Meta:
         model   = MembershipRequest
         fields  = ('sender','timestamp','sender_name')   
+        
+class ViewAllMembersSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Clubs
+        fields = 'id','name','members'

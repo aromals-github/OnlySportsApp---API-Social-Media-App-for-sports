@@ -8,9 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from users.models import Profile,Accounts
 # from .backend import createPostFuntions
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .services import verify_user
+from .services import *
 from clubs.models import *
-  
+from clubs.services import *
+
+
+
 class HostCricketTournament(APIView):
     
     serializer_class        = HostTournamentSerializer
@@ -32,8 +35,10 @@ class HostCricketTournament(APIView):
                     user            = HostCricketTournaments.objects.create(host=account)
                     serializer      = HostTournamentSerializer(user,data = request.data)       
                     if serializer.is_valid():         
-                        serializer.save()
-                        Tournament_Notifications.objects.create(tournament=HostCricketTournaments.objects.filter(host=request.user.id).latest('id'))
+                        d = serializer.save()
+                        Resgister_Tournaments.objects.create(tournament=d)
+                        Tournament_Notifications.objects.create(tournament=d)
+                        Tournament_Reports.objects.create(tournament=d)
                         return Response({'data': serializer.data},status = status.HTTP_201_CREATED)             
                     else:
                         return Response({'errors':serializer.errors},status = status.HTTP_400_BAD_REQUEST)
@@ -111,3 +116,106 @@ class TournamentUpdateDelete(APIView):
                 return Response({"Tournament not found"})
         except:
             return Response({"Error":"Server Error"})
+
+
+
+class ReportTournament(APIView):
+    
+    serializer_class        = TournamentSerializer
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostCricketTournaments.objects.all()
+    
+    def post(self,request,pk):
+        try:
+            if HostCricketTournaments.objects.filter(id=pk,host=request.user.id):
+                return Response({"Error":"You cannot report your own tournament."})
+            else:
+                if Tournament_Reports.objects.filter(tournament=pk,reporters = request.user.id):
+                    return Response({"Success":"Already reported"})
+                else:
+                    get = Tournament_Reports.objects.get(tournament=pk)
+                    get.reporters.add(request.user.id)
+                    report_action(pk)
+                    return Response({"Success":"You have reported the tournament as inadequate."})
+        except:
+            return Response({"Error":"Server Error"})
+        
+class TournamentRegistration(APIView):
+    
+    serializer_class        = TournamentSerializer
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostCricketTournaments.objects.all()
+    
+    def post(self,request,pk):
+        createClubHistory(request)
+        try:
+            if HostCricketTournaments.objects.filter(id=pk):
+                if Tournament_Notifications.objects.filter(tournament=pk,verified =True):
+                    user_history = ClubHistoryPerUser.objects.get(user=request.user.id)
+                    if user_history.owner == True: 
+                        getClub = Clubs.objects.get(owner=request.user.id)
+                        if Resgister_Tournaments.objects.filter(tournament=pk,registered=getClub.id):
+                            return Response({"Success":"Your club is already registered for the tournament."})
+                        else:    
+                            registration = Resgister_Tournaments.objects.get(tournament=pk)
+                            registration.registered.add(getClub.id)
+                            getTournament = HostCricketTournaments.objects.get(id=pk)
+                            getTournament.registered_teams.add(getClub.id)
+                            return Response({"Success":"Club Registered for the tournament"})
+                    elif ((user_history.club_admin.filter())):
+                        getClub = user_history.club_admin.get()
+                        if Resgister_Tournaments.objects.filter(tournament=pk,registered=getClub.id):
+                            return Response({"Success":"Your club is already registered for the tournament."})
+                        else:
+                            registration = Resgister_Tournaments.objects.get(tournament=pk)
+                            registration.registered.add(getClub.id)
+                            getTournament = HostCricketTournaments.objects.get(id=pk)
+                            getTournament.registered_teams.add(getClub.id)
+                            return Response({"Success":"Club Registered for the tournament"})
+                    else:
+                        return Response({"Registration Error":"You are not an Owner or an admin for any club"})
+                else:
+                    return Response({"Error":"Tournament is either been cancelled or reported as inadequate."})   
+            else:
+                return Response({"Error": "Tournament not found"})
+        except:
+            return Response({"Error":"Server Error"})
+        
+        
+    def delete(self,request,pk):
+        
+        try:
+            if HostCricketTournaments.objects.filter(id=pk):
+                if Tournament_Notifications.objects.filter(tournament=pk):
+                    user_history = ClubHistoryPerUser.objects.get(user=request.user.id)
+                    if user_history.owner == True: 
+                        getClub = Clubs.objects.get(owner=request.user.id)
+                        if Resgister_Tournaments.objects.filter(tournament=pk,registered=getClub.id):
+                            registration = Resgister_Tournaments.objects.get(tournament=pk)
+                            registration.registered.remove(getClub.id)
+                            getTournament = HostCricketTournaments.objects.get(id=pk)
+                            getTournament.registered_teams.remove(getClub.id)
+                            return Response({"Success":"Registration Cancelled."})
+                        else:    
+                            return Response({"Success":"Already Cancelled"})
+                        
+                    elif ((user_history.club_admin.filter())):
+                        getClub = user_history.club_admin.get()
+                        if Resgister_Tournaments.objects.filter(tournament=pk,registered=getClub.id):
+                            registration = Resgister_Tournaments.objects.get(tournament=pk)
+                            registration.registered.remove(getClub.id)
+                            getTournament = HostCricketTournaments.objects.get(id=pk)
+                            getTournament.registered_teams.remove(getClub.id)
+                            return Response({"Success":"Registration Cancelled."})
+                        else:
+                            return Response({"Success":"Already Cancelled"})
+                    else:
+                        return Response({"Cancellation Error":"You are not an Owner or an admin for any club"})
+                else:
+                    return Response({"Error":"Tournament is either been cancelled or reported as inadequate."})   
+            else:
+                return Response({"Error": "Tournament not found"})
+        except:
+            return Response({"Error":"Server Error"}) 

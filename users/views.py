@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Accounts,Profile
-from .serializer import SignUpSerializer,ProfileSerializer
+from .serializer import*
 from rest_framework.request import Request
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -48,7 +48,7 @@ class LoginViewSet(APIView):
             token       = create_jwt_token(user=user)
             response    = {"message":"logged in","tokens":token}
             return Response(data=response)
-        return Response({"message":"credentials are not given ."})
+        return Response({"message":"User with  given email and password not found ."})
     
 
 class LogoutView(APIView):
@@ -73,7 +73,7 @@ class LogoutView(APIView):
 class UserProfileViewSet(APIView):
     
     queryset                = Profile.objects.all()
-    serializer_class        = ProfileSerializer
+    serializer_class        = ProfileSerializer,ProfileUpdateSerializer
     authentication_classes  = (JWTAuthentication,)
     permission_classes      = (IsAuthenticated,)
     
@@ -86,7 +86,7 @@ class UserProfileViewSet(APIView):
         try :
             if Profile.objects.filter(user = user_id) :
                 database    = Profile.objects.get(user = user_id)
-                serializer  = ProfileSerializer(database,many=False)   
+                serializer  = ProfileViewSerializer(database,many=False)   
                 return Response ({'data':serializer.data},status=status.HTTP_302_FOUND)
             
             else :
@@ -130,7 +130,7 @@ class UserProfileViewSet(APIView):
             
             if Profile.objects.filter(user=user_id):
                 user        = Profile.objects.get(user=user_id)
-                serializer  = ProfileSerializer(user,data=request.data)
+                serializer  = ProfileUpdateSerializer(user,data=request.data)
                 if serializer.is_valid():
                     serializer.save()
                     return Response({'data':serializer.data},status=status.HTTP_202_ACCEPTED)

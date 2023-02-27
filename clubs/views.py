@@ -17,11 +17,13 @@ class CreateClubViewSet(APIView):
     def post(self,request,*args,**kwargs):
         
         try:
-            loggedInUser    = request.user.id
-            userClub        = request.data['games']
-            get_profile     = Profile.objects.get(user= loggedInUser)
+            loggedInUser     = request.user.id
+            userGames        = request.data['games']
+            get_profile      = Profile.objects.get(user= loggedInUser)
+            createClubHistory(request)
             verifyUser      = clubRepo(request)
-            if (userClub in get_profile.games or 'A' in get_profile.games):
+
+            if((userGames in get_profile.games ) or ('A' in get_profile.games)):
                     if verifyUser == 1:
                         user        = Accounts.objects.get(id=loggedInUser)
                         admin       = Clubs.objects.create(owner=user)
@@ -29,7 +31,6 @@ class CreateClubViewSet(APIView):
                         if serializer.is_valid():
                             serializer.save()
                             updateClubHistory(request)
-                            
                             return Response({"Club created":serializer.data})  
                         else:
                             return Response({'errors':serializer.errors})
@@ -115,20 +116,26 @@ class ClubMembershipViewSet(APIView):
     def post(self,request,pk,action): 
         
         try:
+            createClubHistory(request)
             getHistoryUser = ClubHistoryPerUser.objects.get(user=request.user.id)
+            
             if getHistoryUser.owner == False:
-                if getHistoryUser.total_admin() <= 2:
+                
+                if getHistoryUser.total_admin() < 1:
+                   
                     if getHistoryUser.total_membership() >= 5:
-                      return Response({"You are member in 5 clubs,exist from another club to join new"})
+                        return Response({"You are member in 5 clubs,exist from another club to join new"})
                     else:
-                        if Clubs.objects.get(id=pk):
                         
+                        if Clubs.objects.get(id=pk):
+                           
                             if MembershipResponses.objects.filter(club=pk,blocked=request.user.id):
                                 return Response({"Status":"You are blocked"})
                             else:
-                            
+                                
                                 list_created = membershipList(request,pk) ; '''CREATE LIST FOR MEMBERS'''
                                 if action == 1:
+                                    print("\n entered \n")
                                     user    = request.user.id 
                                     account = Accounts.objects.get(id=user)
                                     club_requested = Clubs.objects.get(id=pk)
@@ -138,7 +145,7 @@ class ClubMembershipViewSet(APIView):
                                 
                                     else:
                                         if MembershipRequest.objects.filter(club=pk).filter(is_active=False).filter(sender=user):
-                                            return Response({"Status":"You are already a member of the club"})
+                                            return Response({"Status":"You are already a member for the club"})
                                         else:
                                             if list_created == False:
                                                 return Response({"User Error":"You are the owner for the club."})
@@ -183,11 +190,12 @@ class ClubMembershipResponse(APIView):
         try:
             if MembershipResponses.objects.filter(club=pk):
                 club = Clubs.objects.get(id=pk)
+                
                 if ((club.owner.id == request.user.id)or(Clubs.objects.filter(id=pk,admins=request.user.id))) :
                     account = Accounts.objects.get(id=user)
                     if action == 1:
                         getHistory  = ClubHistoryPerUser.objects.get(user=user)
-                        if (getHistory.total_membership() < 5 and getHistory.total_admin() < 2):
+                        if (getHistory.total_membership() < 5 and getHistory.total_admin() < 1):
                             if MembershipRequest.objects.get(club=pk,sender=account,is_active=True):
                                 membership_model_accepted = MembershipRequest.objects.get(club=pk,sender=account,is_active=True)
                                 membership_model_accepted.delete()
@@ -257,7 +265,7 @@ class RemoveMemberClubViewSet(APIView):
                 else:
                     return Response({"Access Error":"Not the Owner or an Admin "})
         except:
-            return Response({"Error"})
+            return Response({"Error":"Server Error"})
 
 class ViewAllRequestsViewSet(APIView):
     authentication_classes  = (JWTAuthentication,)
@@ -276,7 +284,7 @@ class ViewAllRequestsViewSet(APIView):
             else:
                 return Response({"Your are not the owner or the admin of for the club."})
         except:
-            return Response({"There is no club with the given 'ID'"})
+            return Response({"Not Found":"There is no club with the given 'ID'"})
         
          
 class ClubAdminsViewSet(APIView):
@@ -300,12 +308,12 @@ class ClubAdminsViewSet(APIView):
                             return Response ({"Admin Limit": "Admin limit reached  ,remove an existing one."})
                         else:
                             getHistory = ClubHistoryPerUser.objects.get(user=user)
-                            if getHistory.total_admin() >= 2:
-                                return Response ({"Condition Error ":"User is already Admin for other clubs."})
+                            if getHistory.total_admin() >= 1:
+                                return Response ({"Condition Error ":"User is already Admin for a different club."})
                             else:
                                 addAdmin.clubAdmins.add(user)
                                 club.admins.add(user)
-                                getHistory.club_admin.add(club)
+                                getHistory.club_admin.add(club.id)
                                 return Response({"Admin added"})       
                     else:
                         return Response({"Membership Error":"Only a member for the club can be added as admin."})
@@ -320,9 +328,12 @@ class ClubAdminsViewSet(APIView):
             club    = Clubs.objects.get(id=pk)
             if club.owner.id == request.user.id:
                 if Clubs.objects.filter(id=pk,admins=user):
+                   
                     clubAdmin = ClubAdmins.objects.get(club=pk)
                     clubAdmin.clubAdmins.remove(user)
                     club.admins.remove(user)
+                    getHistory = ClubHistoryPerUser.objects.get(user=user)
+                    getHistory.club_admin.remove(pk)
                     return Response({"Status":"Removed from Admins"})
                 else:
                     return Response({"Not an Admin"})
@@ -330,5 +341,5 @@ class ClubAdminsViewSet(APIView):
                 return Response({"Error":"Only owner of the club can remove admins."})
             
         except:
-            return Response({"Club not found or error in loading admins"})
+            return Response({"Error":"Server Error"})
         

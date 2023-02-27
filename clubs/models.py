@@ -45,6 +45,12 @@ class Clubs(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def name_admins(self):
+       return [user.username for user in self.admins.all()]
+   
+    def name_members(self):
+       return [user.username for user in self.members.all()]
       
 def changes(sender,**kwargs):
     if kwargs['instance'].members.count() > 60:
@@ -142,6 +148,7 @@ class ClubHistoryPerUser(models.Model):
     owner               = models.BooleanField(default=False)
     club_member         = models.ManyToManyField("clubs.Clubs",related_name="member",blank=True)
     club_admin          = models.ManyToManyField("clubs.Clubs",related_name="admin",blank=True)
+    club_admin_of       = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=True,null=True) #delete
     
     class Meta:
         verbose_name_plural = "Club History of Users"

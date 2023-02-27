@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     
     'multiselectfield',
     'rest_framework_simplejwt.token_blacklist',
+    'phonenumber_field',
            
 ]
 

@@ -10,4 +10,15 @@ class HostTournaments(admin.ModelAdmin):
 @admin.register(Tournament_Notifications)
 class HostTournaments(admin.ModelAdmin):
     list_display = ('tournament','verified','cancelled','reported')
+
+
+@admin.register(Tournament_Reports)
+class Reports(admin.ModelAdmin):
+    list_display = ('tournament','count_reporters')
+
+
+
+@admin.register(Resgister_Tournaments)
+class Reports(admin.ModelAdmin):
+    list_display = ('tournament','count_teams')
     

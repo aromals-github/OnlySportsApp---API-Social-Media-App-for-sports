@@ -20,7 +20,7 @@ class HostCricketTournaments(models.Model):
           ("TS", 'Thirssur'),
           ("WA", 'Wayanad')
         )
-   
+
     host               = models.ForeignKey(Accounts,on_delete = models.CASCADE,blank=False,null=False)
     tournament_name    = models.CharField(max_length = 70,blank = True,null = True)
     banner             = models.ImageField(upload_to='CricketTournaments',blank = True, null=True)
@@ -41,6 +41,7 @@ class HostCricketTournaments(models.Model):
     def __str__(self):
         return self.tournament_name
 
+
 class Tournament_Notifications(models.Model):
     
     tournament      = models.ForeignKey(HostCricketTournaments,on_delete=models.CASCADE,blank=False)
@@ -53,3 +54,35 @@ class Tournament_Notifications(models.Model):
         
     def __str__(self):
         return self.tournament.tournament_name
+     
+
+
+class Tournament_Reports(models.Model):
+    
+    tournament      = models.ForeignKey(HostCricketTournaments,on_delete=models.CASCADE,blank=True)
+    reporters       = models.ManyToManyField(Accounts,related_name="reporters",blank=True)
+    
+    def count_reporters(self):
+        return self.reporters.count()
+    
+    class Meta:
+        verbose_name_plural ="Reports"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+
+       
+class Resgister_Tournaments(models.Model):
+    
+    tournament = models.ForeignKey(HostCricketTournaments,on_delete=models.DO_NOTHING)
+    registered = models.ManyToManyField(Clubs,related_name="registered",blank=True)
+    
+    
+    class Meta:
+        verbose_name_plural = "Registered Teams"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+    
+    def count_teams(self):
+        return self.registered.count()
