@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/a240900f-b62f-4441-8100-d94e0fecb7f1/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/iSportsApp",
+    "appService.deploySubpath": "."
+}
