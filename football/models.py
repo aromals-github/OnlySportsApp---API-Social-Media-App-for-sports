@@ -1,60 +1,88 @@
 from django.db import models
 from users.models import Accounts
+from clubs.models import Clubs
 
+class HostFootballTournaments(models.Model):
+    
+    DISTRICT_CHOICES = (
+          ("AL", 'Alappuzha'),
+          ("ER", 'Ernakulam'),
+          ("ID", 'Idukki'),
+          ("KN", 'Kannur'),
+          ("KS", 'Kasaragod'),
+          ("KL", 'Kollam'),
+          ("KT", 'Kottayam'),
+          ("KZ", 'Kozhikode'),
+          ("MA", 'Malapuram'),
+          ("PL", 'Palakkad'),
+          ("PT", 'Pathanmthitta'),
+          ("TV",'Thiruvanathapuram'),
+          ("TS", 'Thirssur'),
+          ("WA", 'Wayanad')
+        )
 
+    host               = models.ForeignKey(Accounts,on_delete = models.CASCADE,blank=False,null=False)
+    tournament_name    = models.CharField(max_length = 70,blank = True,null = True)
+    banner             = models.ImageField(upload_to='FootballTournaments',blank = True, null=True)
+    district           = models.CharField(max_length= 2,choices = DISTRICT_CHOICES,null= True,blank= True)
+    venue              = models.CharField(max_length = 70,blank = True,null = True)
+    date_added         = models.DateTimeField(auto_now_add = True) 
+    description        = models.TextField(max_length=1000,null=True,blank=True) 
+    date               = models.DateField(blank=False,null=True)
+    limit_participants = models.IntegerField(blank=True,null=True)
+    contact            = models.CharField(max_length=600,null=True,blank=True)
+    end_registration   = models.DateField(blank=True,null=True)
+    registered_teams   = models.ManyToManyField(Clubs,related_name="RegisteredForFootball",blank=True)
 
-class FootballPosts(models.Model):
-    
-    FOOTBALL     = "F"
-    GENERAL     = "G"  
-    GAME_CHOICE      = [
-        (FOOTBALL, "Football"),
-        (GENERAL, "General"),
-    ]
-    
-    user                = models.ForeignKey(Accounts,on_delete = models.CASCADE,null=True,blank=True)
-    images              = models.ImageField(upload_to = "football_posts",blank = True,null = True)
-    title               = models.CharField(max_length = 80,blank = True,null = True)
-    description         = models.TextField(max_length = 500,blank = False)
-    date                = models.DateTimeField(auto_now_add = True, null = True,blank = True) 
-    context             = models.CharField(max_length=2,choices = GAME_CHOICE,blank=True
-                                           ,null=True)
-    
-    ''' Here the context has to changed to blank = False and null = False
-        Post should always contain a handle which is the 
-        context '''
     class Meta:
-        verbose_name_plural = "football posts"
-        verbose_name        = 'football post'
+        verbose_name_plural = "Football Tournaments"
+        verbose_name        = 'Football Tournament'
         
-        
-class PostFuntions(models.Model):
-    
-    DEFAULT = 0  
-    REASON1 = 1
-    REASON2 = 2
-    REASON3 = 3
-    REASON4 = 4
+    def __str__(self):
+        return self.tournament_name
 
-    REPORT_REASON = [
-        (DEFAULT,"NONE"),
-        (REASON1, "This post is not related to cricket"),
-        (REASON2, "Content of the this particular post is abusive"),
-        (REASON3, "Sexual Content ") ,
-        (REASON4, "Others")
-    ]
+
+class Tournament_Notifications(models.Model):
     
-    post_id             = models.OneToOneField(FootballPosts,on_delete = models.CASCADE)
-    likes               = models.ManyToManyField(Accounts,related_name ='football_likes',
-                                                 blank=True)
-    dislike             = models.ManyToManyField(Accounts,related_name='football_dislike',
-                                                 blank=True)
-    report              = models.IntegerField(
-                                           choices = REPORT_REASON,
-                                           default = DEFAULT
-                                           )
+    tournament      = models.ForeignKey(HostFootballTournaments,on_delete=models.CASCADE,blank=False)
+    verified        = models.BooleanField(default=True)
+    cancelled       = models.BooleanField(default=False)
+    reported        = models.BooleanField(default=False)
+    
     class Meta:
-        verbose_name_plural = "post funtions"
+        verbose_name_plural = "Notifications"
         
+    def __str__(self):
+        return self.tournament.tournament_name
+     
+
+
+class Tournament_Reports(models.Model):
+    
+    tournament      = models.ForeignKey(HostFootballTournaments,on_delete=models.CASCADE,blank=True)
+    reporters       = models.ManyToManyField(Accounts,related_name="reporters_Football",blank=True)
+    
+    def count_reporters(self):
+        return self.reporters.count()
+    
+    class Meta:
+        verbose_name_plural ="Reports"
         
-      
+    def __str__(self):
+        return self.tournament.tournament_name
+
+       
+class Resgister_Tournaments(models.Model):
+    
+    tournament = models.ForeignKey(HostFootballTournaments,on_delete=models.DO_NOTHING)
+    registered = models.ManyToManyField(Clubs,related_name="registered_Football",blank=True)
+    
+    
+    class Meta:
+        verbose_name_plural = "Registered Teams"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+    
+    def count_teams(self):
+        return self.registered.count()
