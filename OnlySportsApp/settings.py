@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-t-b6+y-+r5w+a^%8340c*d*(0au$44u=3p4dp_ci7bl48esb5s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['dsportsapp.azurewebsites.net']
+ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.ACCOUNTS'
 
