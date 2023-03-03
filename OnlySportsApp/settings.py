@@ -1,4 +1,5 @@
 
+import os
 from pathlib import Path
 from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -12,13 +13,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t-b6+y-+r5w+a^%8340c*d*(0au$44u=3p4dp_ci7bl48esb5s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+
+# ALLOWED_HOSTS = ['isportsapp.azurewebsites.net']
+# CSRF_TRUSTED_ORIGINS = ['https://'+'isportsapp.azurewebsites.net']
 
 ALLOWED_HOSTS = []
 
+
+
 AUTH_USER_MODEL = 'users.ACCOUNTS'
-
-
 # Application definition
 
 
@@ -41,6 +45,7 @@ INSTALLED_APPS = [
     'cricket',
     'football',
     'clubs',
+    'team_management',
     
     
     'multiselectfield',
@@ -148,6 +153,18 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME':'isportsapp',
+#         'USER': 'aromal',
+#         'PASSWORD':'Everlasting123',
+#         'HOST': 'isportsapp.postgres.database.azure.com',
+#         'PORT': '5432',
+#         'OPTIONS': {"sslmode":"require"},
+#     }
+# }
 
 
 

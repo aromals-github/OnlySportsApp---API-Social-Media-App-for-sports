@@ -102,12 +102,12 @@ class Profile(models.Model):
     
     name                = models.CharField(max_length=40,blank=False,null=True)
     
-    DOB                 = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=True,
+    DOB                 = models.DateField("Date in ( MM/DD/YYYY )",null= True,blank=False,
                                            auto_now=False,auto_now_add=False)
     profile_image       = models.ImageField(upload_to='profile_pictures',null=True,blank=True)
     bio                 = models.CharField(max_length =  500 ,blank = True)
     district            = models.CharField(max_length= 2,choices = DISTRICT_CHOICES,
-                                           null= True,blank= True)
+                                           null= True,blank= False)
     
     def age(self):
         

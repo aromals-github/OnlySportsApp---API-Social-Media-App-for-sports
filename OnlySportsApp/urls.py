@@ -7,10 +7,11 @@ from django.conf.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('authentication/',include('users.urls')),
+    path('api/authentication/',include('users.urls')),
     path('api/cricket/',include('cricket.urls')),
     path('api/football/' ,include('football.urls')),
     path('api/clubs/',include('clubs.urls')),
+    path('api/team-management/',include('team_management.urls')),
     
 ]
 

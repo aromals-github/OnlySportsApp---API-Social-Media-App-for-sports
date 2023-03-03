@@ -54,18 +54,13 @@ class Clubs(models.Model):
       
 def changes(sender,**kwargs):
     if kwargs['instance'].members.count() > 60:
-        raise ValidationError('You cant have more than 30 members in a club')       
+        raise ValidationError('You cant have more than 60 members in a club')       
 m2m_changed.connect(changes,sender  = Clubs.members.through)
 
 
 
 class MembershipRequest(models.Model):
-    
-    '''changes needs to be done in production
-    
-        1. sender should not be null 
-        
-    '''
+
     
     club        = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=False)
     sender      = models.ForeignKey(Accounts,blank=True,null=True,on_delete=models.CASCADE) 
@@ -148,7 +143,6 @@ class ClubHistoryPerUser(models.Model):
     owner               = models.BooleanField(default=False)
     club_member         = models.ManyToManyField("clubs.Clubs",related_name="member",blank=True)
     club_admin          = models.ManyToManyField("clubs.Clubs",related_name="admin",blank=True)
-    club_admin_of       = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=True,null=True) #delete
     
     class Meta:
         verbose_name_plural = "Club History of Users"

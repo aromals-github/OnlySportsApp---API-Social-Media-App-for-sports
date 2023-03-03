@@ -97,14 +97,14 @@ class ClubInfoViewSet(APIView):
                     serializer = ClubInfoViewSerializer(club)
                     return Response({"club details": serializer.data})
                 else:
-                    return Response({"No club exists"})
+                    return Response({"Error":"No club exists"})
             
             elif pk==0:
                 AllClubs = Clubs.objects.all()
                 serializer = ClubInfoViewSerializer(AllClubs,many=True)
                 return Response({"all clubs":serializer.data})
         except:
-            return Response({"Unknown error"})
+            return Response({"Error":"Unknown error"})
         
 class ClubMembershipViewSet(APIView):
     
@@ -118,63 +118,65 @@ class ClubMembershipViewSet(APIView):
         try:
             createClubHistory(request)
             getHistoryUser = ClubHistoryPerUser.objects.get(user=request.user.id)
-            
-            if getHistoryUser.owner == False:
-                
-                if getHistoryUser.total_admin() < 1:
-                   
-                    if getHistoryUser.total_membership() >= 5:
-                        return Response({"You are member in 5 clubs,exist from another club to join new"})
-                    else:
-                        
-                        if Clubs.objects.get(id=pk):
-                           
-                            if MembershipResponses.objects.filter(club=pk,blocked=request.user.id):
-                                return Response({"Status":"You are blocked"})
-                            else:
-                                
-                                list_created = membershipList(request,pk) ; '''CREATE LIST FOR MEMBERS'''
-                                if action == 1:
-                                    print("\n entered \n")
-                                    user    = request.user.id 
-                                    account = Accounts.objects.get(id=user)
-                                    club_requested = Clubs.objects.get(id=pk)
-                                
-                                    if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user):  
-                                        return Response ({"Status":"Request is pending"})
-                                
-                                    else:
-                                        if MembershipRequest.objects.filter(club=pk).filter(is_active=False).filter(sender=user):
-                                            return Response({"Status":"You are already a member for the club"})
-                                        else:
-                                            if list_created == False:
-                                                return Response({"User Error":"You are the owner for the club."})
-                                            else:
-                                                instance = MembershipRequest(club=club_requested,sender=account)
-                                                instance.save()
-                                                return Response({"Status":"Requested"})
-                            
-                                elif action == 0:
-                                    user            = request.user.id 
-                                    account         = Accounts.objects.get(id=user)
-                                    club_requested  = Clubs.objects.get(id=pk)
-
-                                    if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user): 
-                                        instance = MembershipRequest.objects.get(club=club_requested,sender=account) 
-                                        instance.delete()
-                                        return Response ({"Cancelled"})
-                                    else:
-                                        return Response(status=status.HTTP_400_BAD_REQUEST)
-                            
-                                else:
-                                    return Response({"error":"URL-/<int:action> || value should be 1 (Send Request) or 0 (Cancel Request)."})
+            getProfile     = Profile.objects.get(user=request.user.id)
+            getClub        = Clubs.objects.get(id=pk)
+            if(('A' in getClub.games) or ('A' in getProfile.games) or (getProfile.games==getClub.games)):
+                if getHistoryUser.owner == False:
+                    
+                    if getHistoryUser.total_admin() < 1:
+                    
+                        if getHistoryUser.total_membership() >= 5:
+                            return Response({"Error":"You are member in 5 clubs,exist from another club to join new"})
                         else:
-                            return Response({"Club doesnt exist."})
+                            
+                            if Clubs.objects.get(id=pk):
+                            
+                                if MembershipResponses.objects.filter(club=pk,blocked=request.user.id):
+                                    return Response({"Status":"You are blocked"})
+                                else:
+                                    
+                                    list_created = membershipList(request,pk) ; '''CREATE LIST FOR MEMBERS'''
+                                    if action == 1:
+                                        user    = request.user.id 
+                                        account = Accounts.objects.get(id=user)
+                                        club_requested = Clubs.objects.get(id=pk)
+                                    
+                                        if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user):  
+                                            return Response ({"Status":"Request is pending"})
+                                    
+                                        else:
+                                            if MembershipRequest.objects.filter(club=pk).filter(is_active=False).filter(sender=user):
+                                                return Response({"Status":"You are already a member for the club"})
+                                            else:
+                                                if list_created == False:
+                                                    return Response({"User Error":"You are the owner for the club."})
+                                                else:
+                                                    instance = MembershipRequest(club=club_requested,sender=account)
+                                                    instance.save()
+                                                    return Response({"Status":"Requested"})
+                                
+                                    elif action == 0:
+                                        user            = request.user.id 
+                                        account         = Accounts.objects.get(id=user)
+                                        club_requested  = Clubs.objects.get(id=pk)
+
+                                        if MembershipRequest.objects.filter(club=club_requested).filter(is_active=True).filter(sender=user): 
+                                            instance = MembershipRequest.objects.get(club=club_requested,sender=account) 
+                                            instance.delete()
+                                            return Response ({"Status":"Cancelled"})
+                                        else:
+                                            return Response(status=status.HTTP_400_BAD_REQUEST)
+                                
+                                    else:
+                                        return Response({"error":"URL-/<int:action> || value should be 1 (Send Request) or 0 (Cancel Request)."})
+                            else:
+                                return Response({"Club doesnt exist."})
+                    else:
+                        return Response({"Error":"You are an admin for a differnet club."})
                 else:
-                    return Response({"Message":"You are an admin for a differnet club."})
+                    return Response ({"Error":" You own a club, an owner cannot request for membership in another clubs."})      
             else:
-                return Response ({"Exits":" You own a club, an owner cannot request for membership in another clubs."})      
-             
+                return Response({"Error":"Check the Club games and verify that your  profile matches the club requirement."})
         except:
              return Response({"ERROR WITH SELECTED CLUB":"This club is either terminated or never existed."})   
          
@@ -231,11 +233,11 @@ class ClubMembershipResponse(APIView):
                         return Response({"Status":"Blocked"})
             
                     else:
-                        return Response({"Invalid Action Request":" Action request is invalid in the url. "})
+                        return Response({"Error":" Action request is invalid in the url."})
                 else:
-                    return Response({"Only owner and club admins can accept and decline memebership requests."})
+                    return Response({"Error":"Only owner and club admins can accept and decline memebership requests."})
             else:
-                return Response({"Club does not exists."})
+                return Response({"Error":"Club does not exists."})
         except:
             return Response({"Error": "Server error"})
 
