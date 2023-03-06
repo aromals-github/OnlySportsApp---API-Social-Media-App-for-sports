@@ -13,4 +13,8 @@ urlpatterns = [
     
     path('membership/requests/<int:pk>',views.ViewAllRequestsViewSet.as_view()),
     path('admins/add-remove/<int:pk>/<int:user>',views.ClubAdminsViewSet.as_view()),
+    
+    path("exit/<int:club>",views.ExitFromClub.as_view()),
+    
+    path("delete/club",views.ClubDeletion.as_view()),
 ]

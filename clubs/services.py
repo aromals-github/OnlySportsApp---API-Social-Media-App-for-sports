@@ -24,8 +24,8 @@ def createClubHistory(request):
 
 
 def updateClubHistory(request):
-    ClubHistoryPerUser.objects.filter(user=request.user.id).update(owner=True)     
-    
+    ClubHistoryPerUser.objects.filter(user=request.user.id).update(owner=True) 
+
 def membershipList(request,club):
     user = request.user.id
     

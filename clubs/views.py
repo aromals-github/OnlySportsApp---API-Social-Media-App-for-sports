@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.models import Profile
 from .serializers import *
 from .services import *
+from team_management.models import Club_Games_History,MemberStatus
 class CreateClubViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
@@ -29,8 +30,10 @@ class CreateClubViewSet(APIView):
                         admin       = Clubs.objects.create(owner=user)
                         serializer  = ClubSerializer(admin,data=request.data)
                         if serializer.is_valid():
-                            serializer.save()
+                            d = serializer.save()
+                            Club_Games_History.objects.create(club=d)
                             updateClubHistory(request)
+                            MemberStatus.objects.create(club=d,member=request.user.id)
                             return Response({"Club created":serializer.data})  
                         else:
                             return Response({'errors':serializer.errors})
@@ -40,9 +43,9 @@ class CreateClubViewSet(APIView):
                                           "Condition 3":'Cannot be member for any other club.',
                                           "Requirement":'Meet all condition by above.'})
             else:
-                return Response ({"Profile  doesn't match with selected game."})
+                return Response ({"Error":"Profile  doesn't match with selected game."})
         except:
-            return Response ({"Server Error"})
+            return Response ({"Error":"Server Error"})
         
         
 class ClubUpdateDeleteViewSet(APIView):
@@ -62,26 +65,27 @@ class ClubUpdateDeleteViewSet(APIView):
                         serializer.save()
                         return Response({"updated data": serializer.data},status=status.HTTP_200_OK)
                     else:
-                        return Response({"errors":serializer.errors},status=status.HTTP_304_NOT_MODIFIED)
+                        return Response({"Errors":serializer.errors},status=status.HTTP_304_NOT_MODIFIED)
                 else:
-                    return Response ({"Owner Error":"Only Owner of the Club can edit club Stats."})
+                    return Response ({"Error":"Only Owner of the Club can edit club Stats."})
             else:
-                return Response("Club does not Exists.")
+                return Response({"Error":"Club does not Exists."})
         except:
-            return Response({"Server Error"})
+            return Response({"Error":"Server Error"})
         
         
     def delete(self,request,pk):
-        
-        user =  request.user.id
-        if Clubs.objects.filter(id=pk).filter(owner=user):
-            club = Clubs.objects.get(id=pk)
-            club.delete()
-            ClubHistoryPerUser.objects.filter(user=request.user.id).update(owner=False)
-            return Response({"Deleted"})
-        else:
-            return Response({"You are not the owner for the club or the Club doesnt not exist"})  
-          
+       try: 
+            user =  request.user.id
+            if Clubs.objects.filter(id=pk).filter(owner=user):
+                club = Clubs.objects.get(id=pk)
+                club.delete()
+                ClubHistoryPerUser.objects.filter(user=request.user.id).update(owner=False)
+                return Response({"Success":"Deleted"})
+            else:
+                return Response({"Error":"You are not the owner for the club or the Club doesnt not exist"})  
+       except:
+           return Response({"Error":"Server Error"})
 class ClubInfoViewSet(APIView):
     
     authentication_classes  = (JWTAuthentication,)
@@ -126,7 +130,7 @@ class ClubMembershipViewSet(APIView):
                     if getHistoryUser.total_admin() < 1:
                     
                         if getHistoryUser.total_membership() >= 5:
-                            return Response({"Error":"You are member in 5 clubs,exist from another club to join new"})
+                            return Response({"Error":"You are member in 5 clubs,exit from another club to join new"})
                         else:
                             
                             if Clubs.objects.get(id=pk):
@@ -211,6 +215,7 @@ class ClubMembershipResponse(APIView):
                             club_model_accepted.members.add(user)
                             updateHistory = ClubHistoryPerUser.objects.get(user=user)
                             updateHistory.club_member.add(club_requested)
+                            MemberStatus.objects.create(club=pk,member=user)
                             return Response({"Status":"Accepted"})
                         else:
                             return Response({"Condition Error":"Requested User is already a member of 5 clubs.",
@@ -261,6 +266,8 @@ class RemoveMemberClubViewSet(APIView):
                         membership_request_model.delete()
                         updateHistory   = ClubHistoryPerUser.objects.get(user=removee)
                         updateHistory.club_member.remove(club_called)
+                        club_status = MemberStatus.objects.get(club=club,member=removee)
+                        club_status.delete()
                         return Response({"Success Message":"Removed from club"})
                     else:
                         return Response({"Not Found":"Not a member"})
@@ -344,4 +351,66 @@ class ClubAdminsViewSet(APIView):
             
         except:
             return Response({"Error":"Server Error"})
+
+
+
+
+class ExitFromClub(APIView):
+     
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    def post (self,request,club):
         
+        try:
+            club_called = Clubs.objects.get(id=club)
+            if (request.user.id == club_called.owner.id):
+                return Response({"Error":"Owner cannot exit the club."})
+            else:
+                if Clubs.objects.filter(id=club,members=request.user.id):
+                    if Clubs.objects.filter(id=club,admins=request.user.id):
+                        club_called.members.remove(request.user.id)
+                        club_called.admins.remove(request.user.id)
+                        membership_responses_model  = MembershipResponses.objects.get(club=club)
+                        membership_responses_model.accepted.remove(request.user.id)
+                        membership_request_model    = MembershipRequest.objects.get(club=club,sender=request.user.id)
+                        membership_request_model.delete()
+                        updateHistory   = ClubHistoryPerUser.objects.get(user=request.user.id)
+                        updateHistory.club_member.remove(club_called)
+                        club_status = MemberStatus.objects.get(club=club,member=request.user.id)
+                        club_status.delete()
+                        admin = ClubAdmins.objects.get(club=club)
+                        admin.clubAdmins.remove(request.user.id)
+                        return Response({"Success":"You left."})
+                    else:
+                        club_called.members.remove(request.user.id)
+                        membership_responses_model  = MembershipResponses.objects.get(club=club)
+                        membership_responses_model.accepted.remove(request.user.id)
+                        membership_request_model    = MembershipRequest.objects.get(club=club,sender=request.user.id)
+                        membership_request_model.delete()
+                        updateHistory   = ClubHistoryPerUser.objects.get(user=request.user.id)
+                        updateHistory.club_member.remove(club_called)
+                        club_status = MemberStatus.objects.get(club=club,member=request.user.id)
+                        club_status.delete()
+                        return Response({"Success":"You left."})
+                else:
+                    return Response({"Error":"You are not a member for the club."})
+        except:
+            return Response({"Error":"Server Error"})
+        
+class ClubDeletion(APIView):
+    
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    
+    def delete(self,request):
+        
+        try:
+            if Clubs.objects.filter(owner=request.user.id):
+                getClub = Clubs.objects.get(owner=request.user.id)
+                getClub.delete()
+                return Response({"Success":"Your Club has been deleted."})
+            else:
+                return Response({"Error":"Only owner can delete the Club. "})
+        except:
+            return Response({"Error":"Server Error"})

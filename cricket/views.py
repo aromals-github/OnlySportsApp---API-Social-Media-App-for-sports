@@ -10,7 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .services import *
 from clubs.models import *
 from clubs.services import *
-
+from team_management.models import ClubCricketMembers,Club_Games_History
 
 
 class HostCricketTournament(APIView):
@@ -162,7 +162,11 @@ class TournamentRegistration(APIView):
                             registration.registered.add(getClub.id)
                             getTournament = HostCricketTournaments.objects.get(id=pk)
                             getTournament.registered_teams.add(getClub.id)
+                            ClubCricketMembers.objects.create(club=getClub.id,tournament=pk)
+                            game_history = Club_Games_History.objects.get(club=getClub.id)
+                            game_history.cricket_registered.add(getTournament.id)
                             return Response({"Success":"Club Registered for the tournament"})
+                        
                     elif ((user_history.club_admin.filter())):
                         getClub = user_history.club_admin.get()
                         if Resgister_Tournaments.objects.filter(tournament=pk,registered=getClub.id):
@@ -172,6 +176,9 @@ class TournamentRegistration(APIView):
                             registration.registered.add(getClub.id)
                             getTournament = HostCricketTournaments.objects.get(id=pk)
                             getTournament.registered_teams.add(getClub.id)
+                            ClubCricketMembers.objects.create(club=getClub.id,tournament=pk)
+                            game_history = Club_Games_History.objects.get(club=getClub.id)
+                            game_history.cricket_registered.add(getTournament.id)
                             return Response({"Success":"Club Registered for the tournament"})
                     else:
                         return Response({"Registration Error":"You are not an Owner or an admin for any club"})
@@ -196,6 +203,8 @@ class TournamentRegistration(APIView):
                             registration.registered.remove(getClub.id)
                             getTournament = HostCricketTournaments.objects.get(id=pk)
                             getTournament.registered_teams.remove(getClub.id)
+                            game_history = Club_Games_History.objects.get(club=getClub.id)
+                            game_history.cricket_registered.remove(getTournament.id)
                             return Response({"Success":"Registration Cancelled."})
                         else:    
                             return Response({"Success":"Already Cancelled"})
@@ -207,6 +216,8 @@ class TournamentRegistration(APIView):
                             registration.registered.remove(getClub.id)
                             getTournament = HostCricketTournaments.objects.get(id=pk)
                             getTournament.registered_teams.remove(getClub.id)
+                            game_history = Club_Games_History.objects.get(club=getClub.id)
+                            game_history.cricket_registered.remove(getTournament.id)
                             return Response({"Success":"Registration Cancelled."})
                         else:
                             return Response({"Success":"Already Cancelled"})

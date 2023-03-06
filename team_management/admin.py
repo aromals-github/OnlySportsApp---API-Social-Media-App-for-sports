@@ -12,27 +12,13 @@ class MemberStatusRegister(admin.ModelAdmin):
     
 @admin.register(ClubCricketMembers)
 class MemberStatusRegister(admin.ModelAdmin):
-    list_display = ('club','tournament',)
+    list_display = ('club','tournament_Name','active')
     
     
     
 @admin.register(ClubFootballMembers)
 class MemberStatusRegister(admin.ModelAdmin):
     list_display = ('club','tournament',)
-    
-    
-@admin.register(MemberTournamentStatus)
-class MemberStatusRegister(admin.ModelAdmin):
-    list_display = ('club','member','status')
-    
-    
-@admin.register(ClubRegisteredCricketTournament)
-class MemberStatusRegister(admin.ModelAdmin):
-    list_display = ('club',)
-    
-@admin.register(ClubRegisteredFootballTournament)
-class MemberStatusRegister(admin.ModelAdmin):
-    list_display = ('club',)
     
     
 @admin.register(Club_Games_History)
