@@ -38,10 +38,7 @@ class CreateClubViewSet(APIView):
                         else:
                             return Response({'errors':serializer.errors})
                     elif verifyUser==0:
-                        return Response ({"Condition 1":'No more than one club can be created by a single user at a time.',
-                                          "Condition 2":'Cannot be admin for any other club.',
-                                          "Condition 3":'Cannot be member for any other club.',
-                                          "Requirement":'Meet all condition by above.'})
+                        return Response ({"Error":"Condition not met."})
             else:
                 return Response ({"Error":"Profile  doesn't match with selected game."})
         except:
@@ -67,7 +64,7 @@ class ClubUpdateDeleteViewSet(APIView):
                     else:
                         return Response({"Errors":serializer.errors},status=status.HTTP_304_NOT_MODIFIED)
                 else:
-                    return Response ({"Error":"Only Owner of the Club can edit club Stats."})
+                    return Response ({"Error":"Only Owner of the Club can edit club Stats."}, status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response({"Error":"Club does not Exists."})
         except:

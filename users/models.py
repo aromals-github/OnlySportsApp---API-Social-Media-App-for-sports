@@ -3,7 +3,7 @@ from django.contrib.auth.base_user import AbstractBaseUser,BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from datetime import date
 from multiselectfield import MultiSelectField
-
+from PIL import Image
 class AccountsManager(BaseUserManager):
     
     use_in_migrations = True
@@ -97,7 +97,7 @@ class Profile(models.Model):
           ("WA", 'Wayanad')
         )
     
-    user                = models.ForeignKey(Accounts,on_delete = models.CASCADE)
+    user                = models.ForeignKey(Accounts,on_delete = models.PROTECT)
     games               = models.CharField(choices=GAME_CHOICE,max_length= 5,default=ALL)
     
     name                = models.CharField(max_length=40,blank=False,null=True)
@@ -126,3 +126,6 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
     
+    
+    
+      
