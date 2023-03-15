@@ -86,3 +86,36 @@ class Resgister_Tournaments(models.Model):
     
     def count_teams(self):
         return self.registered.count()
+
+
+class Participants(models.Model):
+    
+    tournament = models.ForeignKey(HostFootballTournaments,on_delete=models.DO_NOTHING)
+    participants = models.ManyToManyField(Clubs,related_name="participants_football",blank=True)
+    
+    
+    class Meta:
+        verbose_name_plural = "Participated Teams Football"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+    
+    def count_participants(self):
+        return self.participants.count()
+    
+    def participated(self):
+        return [team.name for team in self.participants.all()]
+    
+    
+class FootballTournamentResult(models.Model):
+    
+    tournament  = models.ForeignKey(HostFootballTournaments,on_delete=models.CASCADE,blank=False)
+    date_added  = models.DateTimeField(auto_now_add=True)
+    won         = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=False)
+    
+    class Meta:
+        verbose_name_plural = "Football Tounament Results"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+    

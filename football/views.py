@@ -10,8 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .services import *
 from clubs.models import *
 from clubs.services import *
-
-
+import datetime
+from team_management.models import ClubFootballMembers,Club_Games_History
 
 class HostFootballTournament(APIView):
     
@@ -218,3 +218,52 @@ class TournamentRegistration(APIView):
                 return Response({"Error": "Tournament not found"})
         except:
             return Response({"Error":"Server Error"}) 
+        
+class TournamentResults(APIView):
+
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostFootballTournaments.objects.all()
+    
+    def post(self,request,event,team):
+        
+        try:
+            tournament = HostFootballTournaments.objects.get(id=event)
+            if request.user.id == tournament.host.id:
+                present_date = datetime.date.today()
+                if tournament.date.date() == present_date:
+                    get_club_history = Club_Games_History.objects.get(club=team)
+                    FootballTournamentResult.objects.filter(tournament=event).update(team_won=team)
+                    get_club_history.cricket_tournaments_won.add(event)
+                    return Response({"Success":"Done."})
+                else:
+                    return Response({"Error":"You can only enter the result on the date at which the tournament is hosted."})
+            else:
+                return Response({"Error":"You are not the host for this tournament."})
+        except:
+            return Response({"Error":"Server Error"})
+        
+class GetAllDetailTournament(APIView):
+    
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostFootballTournaments.objects.all()
+    
+    def get(self,request,pk):
+        
+        try:
+            if HostFootballTournaments.objects.filter(id=pk):
+                get_t = HostFootballTournaments.objects.get(id=pk)
+                get_p = Participants.objects.get(tournament=pk)
+                get_r = FootballTournamentResult.objects.get(tournament=pk)
+                combined_serializer = CombinedSerializer({
+                    'tournament': get_t,
+                    'participants': get_p,
+                    'result': get_r,
+                })
+                serializer_data = combined_serializer.data
+                return Response({"Success": serializer_data})
+            else:
+                return Response ({"Error":"Not Found"})
+        except:
+            return Response({"Error":"Server Error"})

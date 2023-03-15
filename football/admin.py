@@ -22,3 +22,15 @@ class Reports(admin.ModelAdmin):
 class Reports(admin.ModelAdmin):
     list_display = ('tournament','count_teams')
     
+    
+    
+
+@admin.register(Participants)
+class Participants_Football(admin.ModelAdmin):
+    list_display = ('tournament','count_participants')
+    
+    
+
+@admin.register(FootballTournamentResult)
+class Results_Football(admin.ModelAdmin):
+    list_display = ('tournament','won')
