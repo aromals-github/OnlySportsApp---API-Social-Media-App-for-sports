@@ -40,6 +40,10 @@ class HostCricketTournaments(models.Model):
         
     def __str__(self):
         return self.tournament_name
+    
+    
+    def registered(self):
+        return [team.name for team in self.registered_teams.all()]
 
 
 class Tournament_Notifications(models.Model):
@@ -48,7 +52,6 @@ class Tournament_Notifications(models.Model):
     verified        = models.BooleanField(default=True)
     cancelled       = models.BooleanField(default=False)
     reported        = models.BooleanField(default=False)
-    
     class Meta:
         verbose_name_plural = "Notifications"
         
@@ -86,3 +89,37 @@ class Resgister_Tournaments(models.Model):
     
     def count_teams(self):
         return self.registered.count()
+    
+    
+    
+class Participants(models.Model):
+    
+    tournament = models.ForeignKey(HostCricketTournaments,on_delete=models.DO_NOTHING)
+    participants = models.ManyToManyField(Clubs,related_name="participants",blank=True)
+    
+    
+    class Meta:
+        verbose_name_plural = "Participated Teams"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+    
+    def count_participants(self):
+        return self.participants.count()
+    
+    def participated(self):
+        return [team.name for team in self.participants.all()]
+    
+    
+class TournamentResult(models.Model):
+    
+    tournament  = models.ForeignKey(HostCricketTournaments,on_delete=models.CASCADE,blank=False)
+    date_added  = models.DateTimeField(auto_now_add=True)
+    team_won = models.ForeignKey(Clubs,on_delete=models.CASCADE,blank=False)
+    
+    class Meta:
+        verbose_name_plural = "Tounament Results"
+        
+    def __str__(self):
+        return self.tournament.tournament_name
+    

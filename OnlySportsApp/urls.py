@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/football/' ,include('football.urls')),
     path('api/clubs/',include('clubs.urls')),
     path('api/team-management/',include('team_management.urls')),
+    path('',include('users.urls')),
     
 ]
 

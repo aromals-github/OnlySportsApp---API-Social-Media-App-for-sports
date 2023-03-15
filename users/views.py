@@ -144,3 +144,8 @@ class UserProfileViewSet(APIView):
            return Response(status=status.HTTP_102_PROCESSING)
     
     
+class WelcomeView(APIView):
+    
+     permission_classes = []
+     def get(self,request):
+         return Response({"WECOME TO ISPORTS"})

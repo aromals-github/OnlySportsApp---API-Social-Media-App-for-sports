@@ -11,7 +11,7 @@ from .services import *
 from clubs.models import *
 from clubs.services import *
 from team_management.models import ClubCricketMembers,Club_Games_History
-
+import datetime
 
 class HostCricketTournament(APIView):
     
@@ -38,6 +38,7 @@ class HostCricketTournament(APIView):
                         Resgister_Tournaments.objects.create(tournament=d)
                         Tournament_Notifications.objects.create(tournament=d)
                         Tournament_Reports.objects.create(tournament=d)
+                        TournamentResult.objects.create(tournament=d)
                         return Response({'data': serializer.data},status = status.HTTP_201_CREATED)             
                     else:
                         return Response({'errors':serializer.errors},status = status.HTTP_400_BAD_REQUEST)
@@ -229,3 +230,54 @@ class TournamentRegistration(APIView):
                 return Response({"Error": "Tournament not found"})
         except:
             return Response({"Error":"Server Error"}) 
+        
+class TournamentResults(APIView):
+
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostCricketTournaments.objects.all()
+    
+    def post(self,request,event,team):
+        
+        try:
+            tournament = HostCricketTournaments.objects.get(id=event)
+            if request.user.id == tournament.host.id:
+                present_date = datetime.date.today()
+                if tournament.date.date() == present_date:
+                    get_club_history = Club_Games_History.objects.get(club=team)
+                    TournamentResult.objects.filter(tournament=event).update(team_won=team)
+                    get_club_history.cricket_tournaments_won.add(event)
+                    return Response({"Success":"Done."})
+                else:
+                    return Response({"Error":"You can only enter the result on the date at which the tournament is hosted."})
+            else:
+                return Response({"Error":"You are not the host for this tournament."})
+        except:
+            return Response({"Error":"Server Error"})
+        
+class GetAllDetailTournament(APIView):
+    
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = HostCricketTournaments.objects.all()
+    
+    def get(self,request,pk):
+        
+        try:
+            if HostCricketTournaments.objects.filter(id=pk):
+                get_t = HostCricketTournaments.objects.get(id=pk)
+                get_p = Participants.objects.get(tournament=pk)
+                print(get_p)
+                get_r = TournamentResult.objects.get(tournament=pk)
+                combined_serializer = CombinedSerializer({
+                    
+                    'tournament': get_t,
+                    'participants': get_p,
+                    'result': get_r,
+                })
+                serializer_data = combined_serializer.data
+                return Response({"Success": serializer_data})
+            else:
+                return Response ({"Error":"Not Found"})
+        except:
+            return Response({"Error":"Server Error"})
