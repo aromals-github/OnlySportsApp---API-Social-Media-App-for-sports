@@ -24,3 +24,8 @@ class MemberStatusRegister(admin.ModelAdmin):
 @admin.register(Club_Games_History)
 class MemberStatusRegister(admin.ModelAdmin):
     list_display = ('club','registered_cricket','registered_football','cricket_won','football_won')
+    
+
+@admin.register(Annoncements)
+class Annocements_register(admin.ModelAdmin):
+    list_display = ('club','date','announcer')

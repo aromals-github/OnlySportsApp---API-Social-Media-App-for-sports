@@ -47,7 +47,7 @@ class Serializer_Three(serializers.ModelSerializer):
     
     class Meta:
         model = TournamentResult
-        fields = ('team_won','date_added')
+        fields = ('team_won','date_added','team_won')
 
 class CombinedSerializer(serializers.Serializer):
     

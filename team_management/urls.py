@@ -20,4 +20,7 @@ urlpatterns =[
     path('display/cricket-team/<int:club>/<int:tournament>',views.TournamentCricketTeam.as_view()),
     path('display/all/cricket-tournament/team/<int:club>',views.GetAllRegisteredTournament.as_view()),
     path('display/all/football-tournament/team/<int:club>',views.GetAllRegisteredTournament.as_view()),
+    
+    
+    path('annocement/<int:id>',views.Team_Annoncements.as_view()),
     ]

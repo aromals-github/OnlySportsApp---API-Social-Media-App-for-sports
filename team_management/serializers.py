@@ -37,3 +37,16 @@ class FootballTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClubCricketMembers
         fields = ('tournament_Name','player_name','players_count',)
+
+
+class Annocement_Serializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Annoncements
+        fields = ('message',)
+        
+class Annocement_Serializer_get(serializers.ModelSerializer):
+    
+      class Meta:
+        model = Annoncements
+        fields = ( 'announcer','date')

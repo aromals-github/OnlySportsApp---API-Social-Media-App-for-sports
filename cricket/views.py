@@ -267,10 +267,8 @@ class GetAllDetailTournament(APIView):
             if HostCricketTournaments.objects.filter(id=pk):
                 get_t = HostCricketTournaments.objects.get(id=pk)
                 get_p = Participants.objects.get(tournament=pk)
-                print(get_p)
                 get_r = TournamentResult.objects.get(tournament=pk)
                 combined_serializer = CombinedSerializer({
-                    
                     'tournament': get_t,
                     'participants': get_p,
                     'result': get_r,
@@ -279,5 +277,6 @@ class GetAllDetailTournament(APIView):
                 return Response({"Success": serializer_data})
             else:
                 return Response ({"Error":"Not Found"})
-        except:
-            return Response({"Error":"Server Error"})
+        except Exception as e:
+            return Response({"Error": f"Server Error: {e}"})
+        

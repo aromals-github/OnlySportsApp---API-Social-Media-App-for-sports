@@ -359,10 +359,57 @@ class GetAllRegisteredTournament(APIView):
     
     def get(self,request,club):
         
-        if Clubs.objects.filter(id=club,owner=request.user.id) or Clubs.objects.filter(id=club,members=request.user.id):
-            getAll = ClubFootballMembers.objects.filter(active=True).all()
-            serializer = FootballTeamSerializer(getAll,many=True)
-            return Response({"Registered Tournaments":serializer.data})
+        try:
+            if Clubs.objects.filter(id=club,owner=request.user.id) or Clubs.objects.filter(id=club,members=request.user.id):
+                getAll = ClubFootballMembers.objects.filter(active=True).all()
+                serializer = FootballTeamSerializer(getAll,many=True)
+                return Response({"Registered Tournaments":serializer.data})
+                
+            else:
+                return Response({"Error":"Not an owner or an member for the club."})
+       
+        except Exception as e:
+            return Response({"Error": f"{e}"})
+        
+class Team_Annoncements(APIView):
+    
+    authentication_classes  = (JWTAuthentication,)
+    permission_classes      = (IsAuthenticated,)
+    queryset                = Annoncements.objects.all()
+    serializer_classes      = Annocement_Serializer
+    
+    def post(self,request,id):
+        
+        try:
+            if  Clubs.objects.filter(id=id,owner=request.user.id) or Clubs.objects.filter(id=id,admins=request.user.id):
+                user  = Accounts.objects.get(id=request.user.id)
+                club = Clubs.objects.get(id=id)
+                add = Annoncements.objects.create(announcer=user,club=club)
+                serializer = Annocement_Serializer(add,data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response ({"Success":"Message Posted."})
+                else:
+                    return Response({'errors':serializer.errors},status = status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"Error":"You need to be the owner or an admin for the club to make any annocements"})
+        except Exception as e:
+            return Response({"Error": f"{e}"})
+    
+    def get(self,request,id):
+        try:
+            if  Clubs.objects.filter(id=id,owner=request.user.id) or Clubs.objects.filter(id=id,members=request.user.id):
+                latest_instances = Annoncements.objects.filter(club=id,announcer=request.user.id).order_by('-id').values_list('id', flat=True)[:5]
+                serializer = Annocement_Serializer_get(latest_instances) 
+                return Response({"Messages":serializer.data})
+            else:
+                return Response({"Not an member for the club."})
             
-        else:
-            return Response({"Error":"Not an owner or an member for the club."})
+        except Exception as e:
+            return Response({"Error": f"{e}"})
+            
+    def put(self,request,id):
+        pass
+    
+    def delete(Self,request,id):
+        pass

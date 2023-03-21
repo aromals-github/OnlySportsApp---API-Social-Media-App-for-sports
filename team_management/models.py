@@ -98,3 +98,17 @@ class Club_Games_History(models.Model):
     
     def __str__(self):
         return self.club.name
+    
+    
+class Annoncements(models.Model):
+    
+    club = models.ForeignKey(Clubs,on_delete=models.CASCADE,null=False,blank=False)
+    message = models.CharField(max_length=600,blank=False)
+    date = models.DateTimeField(auto_now_add=True)
+    announcer = models.ForeignKey(Accounts,on_delete=models.CASCADE,blank=True,null=True)
+    
+    def __str__(self):
+        return self.club.name
+    
+    class Meta:
+        verbose_name_plural = 'Annocements'

@@ -1,7 +1,6 @@
 from django.db import models
 from users.models import Accounts
 from clubs.models import Clubs
-
 class HostFootballTournaments(models.Model):
     
     DISTRICT_CHOICES = (
@@ -24,6 +23,7 @@ class HostFootballTournaments(models.Model):
     host               = models.ForeignKey(Accounts,on_delete = models.CASCADE,blank=False,null=False)
     tournament_name    = models.CharField(max_length = 70,blank = True,null = True)
     banner             = models.ImageField(upload_to='FootballTournaments',blank = True, null=True)
+ 
     district           = models.CharField(max_length= 2,choices = DISTRICT_CHOICES,null= True,blank= True)
     venue              = models.CharField(max_length = 70,blank = True,null = True)
     date_added         = models.DateTimeField(auto_now_add = True) 
@@ -40,6 +40,7 @@ class HostFootballTournaments(models.Model):
         
     def __str__(self):
         return self.tournament_name
+
 
 
 class Tournament_Notifications(models.Model):
@@ -118,4 +119,4 @@ class FootballTournamentResult(models.Model):
         
     def __str__(self):
         return self.tournament.tournament_name
-    
+     
