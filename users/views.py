@@ -11,6 +11,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,OutstandingToken 
 from .tokens import create_jwt_token
 from .services import createClubHistory
+
+
+
 class SignUpUserViewSet(APIView):
 
     serializer_class        = SignUpSerializer
@@ -103,8 +106,8 @@ class UserProfileViewSet(APIView):
         
         try :
             if Profile.objects.filter(user = user_id):
-                response = {'message': "You already have a profile set."}
-            return Response(response,status=status.HTTP_409_CONFLICT)  
+                response = {'message': True}
+                return Response(response,status=status.HTTP_409_CONFLICT)  
         except: 
              
             id_user     = Accounts.objects.get(id = user_id) 

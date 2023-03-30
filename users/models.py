@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser,BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from datetime import date
-from multiselectfield import MultiSelectField
-from PIL import Image
+
+
 class AccountsManager(BaseUserManager):
     
     use_in_migrations = True
